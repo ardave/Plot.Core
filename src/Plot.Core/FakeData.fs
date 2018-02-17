@@ -5,7 +5,7 @@ module FakeData =
     open System
     open LineChart
 
-    let hourlyData =
+    let hourlyDataInts =
         [|
         112
         118
@@ -153,7 +153,7 @@ module FakeData =
         432
         |] |> Array.mapi(fun i x -> { x = float32 i; y = float32 x; originalX = i})
 
-    let hourlyDataX =
+    let hourlyDataDateTimes =
         [|
         "1949-01",112
         "1949-02",118

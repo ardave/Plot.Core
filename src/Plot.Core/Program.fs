@@ -12,11 +12,11 @@ do()
 
 [<EntryPoint>]
 let main _ =
-    let points   = Plot.Core.FakeData.hourlyDataX
+    let points   = Plot.Core.FakeData.hourlyDataDateTimes
     let settings = createLineChartSettings "Air Passenger Data"
-    let image = points |> createLineChart settings
+    let imageOpt = points |> createLineChart settings
 
-    match image with
+    match imageOpt with
     | Some img -> img.Save "AirPassengerData.png"
     | None -> failwith "Maybe you didn't include any points for your chart"
     0
