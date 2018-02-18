@@ -21,12 +21,12 @@ module LineChart =
         y : float32
     } 
 
-    type MinMax<'T> = {
+    type internal MinMax<'T> = {
         value : float32
         originalValue : 'T
     }
 
-    type MinMaxes<'T> = {
+    type internal MinMaxes<'T> = {
         minX : MinMax<'T>
         maxX : MinMax<'T>
         minY : float32
@@ -55,7 +55,7 @@ module LineChart =
 
     let private pointToMinMax point = { originalValue = point.originalX; value = point.x }
 
-    let private getMinMaxes (firstPoint:ChartPoint<'T>) points =
+    let internal getMinMaxes (firstPoint:ChartPoint<'T>) points =
         let initialState =
             {
                 minX = 

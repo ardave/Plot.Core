@@ -1,13 +1,9 @@
 ﻿open System.Runtime.CompilerServices
 open SixLabors.ImageSharp
-open SixLabors.Shapes
-open SixLabors.Primitives
-open SixLabors.Fonts
-open SixLabors.ImageSharp.Drawing
 open Plot.Core.LineChart
 open Plot.Core.Settings
 
-[<assembly: InternalsVisibleTo("tests")>]
+[<assembly: InternalsVisibleTo("Tests")>]
 do()
 
 [<EntryPoint>]
