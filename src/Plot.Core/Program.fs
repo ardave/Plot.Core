@@ -9,7 +9,7 @@ do()
 [<EntryPoint>]
 let main _ =
     let points   = Plot.Core.FakeData.hourlyDataDateTimes
-    let settings = createLineChartSettings "Air Passenger Data"
+    let settings = createLineChartSettings "Air Passenger Data" 1500 500
     let imageOpt = points |> createLineChart settings
 
     match imageOpt with

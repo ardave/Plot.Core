@@ -33,6 +33,8 @@ module LineChart =
         maxY : float32
     }
 
+    type ImageMutation = IImageProcessingContext<Rgba32> -> unit
+
     let private pointf (x:int) (y:int) = PointF(float32 x, float32 y)
     let private addLine p1 p2 (pb:PathBuilder) = pb.AddLine(p1, p2) |> ignore
     let private pointsToPoints points = points |> Array.map(fun point -> PointF(point.x, point.y))
@@ -131,8 +133,6 @@ module LineChart =
         let path = pbText4.Build()
         ctx.DrawText(maxXStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
 
-    type ImageMutation = IImageProcessingContext<Rgba32> -> unit
-
     let private fillBackground (ctx:IImageProcessingContext<Rgba32>) =
         ctx.Fill(Rgba32.White) |> ignore
 
@@ -157,30 +157,29 @@ module LineChart =
         let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.GridLineStyle.Color, settings.GridLineStyle.Thickness, path) |> ignore
         upperLeft, lowerRight, drawFunc
 
-    let private drawTitle settings (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
+    let private drawTitle settings (ctx:IImageProcessingContext<Rgba32>) =
         let pb = PathBuilder()
         pb.ResetOrigin() |> ignore
         let starting = float32 settings.Width / 2.f
         let y = float32 settings.Height * 0.1f
-        let titleWidth = float32 settings.Title.Length * font.Size
+        let titleWidth = float32 settings.Title.Length * settings.Font.Size
         let p5 = PointF(starting - titleWidth * 0.25f, y)
         let p6 = PointF(starting + titleWidth * 0.75f, y)
 
         pb.AddLine(p5, p6) |> ignore
         pb.ResetOrigin() |> ignore
         let path = pb.Build()
-        ctx.DrawText(settings.Title, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+        ctx.DrawText(settings.Title, settings.Font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
 
 
     let createLineChart settings (chartPoints:ChartPoint<'T> array) =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
-        let font = SystemFonts.CreateFont("Arial", 18.f, FontStyle.Regular)
         let upperLeft, lowerRight, drawGridLinesFunc = drawGridLines settings img
 
         let backgroundMutations = [
             fillBackground
             drawGridLinesFunc
-            drawTitle settings font
+            drawTitle settings
         ]
 
         match chartPoints |> Array.tryGet 0 with
@@ -190,10 +189,10 @@ module LineChart =
 
             let allMutations = backgroundMutations @ [
                                             drawDataLinesFunc
-                                            drawMaxX minMaxes lowerRight font
-                                            drawMinX minMaxes upperLeft lowerRight font
-                                            drawMinY minMaxes upperLeft lowerRight font
-                                            drawMaxY minMaxes upperLeft font
+                                            drawMaxX minMaxes lowerRight settings.Font
+                                            drawMinX minMaxes upperLeft lowerRight settings.Font
+                                            drawMinY minMaxes upperLeft lowerRight settings.Font
+                                            drawMaxY minMaxes upperLeft settings.Font
                                         ]
 
             img.Mutate(fun ctx ->
