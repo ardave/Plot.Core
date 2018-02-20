@@ -12,6 +12,8 @@ module LineChart =
 
     open Settings
 
+    // TODO:  Maybe make X value a type that is implicitly convertible
+    // to float32, based on the constraints of the float32 function
     type ChartPoint<'T> = {
         // Original value for UI/Rendering/Display purposes
         originalX : 'T
@@ -34,8 +36,7 @@ module LineChart =
     }
 
     type ImageMutation = IImageProcessingContext<Rgba32> -> unit
-
-    let private pointf (x:int) (y:int) = PointF(float32 x, float32 y)
+    let internal pointf x y = PointF(x, y)
     let private addLine p1 p2 (pb:PathBuilder) = pb.AddLine(p1, p2) |> ignore
     let private pointsToPoints points = points |> Array.map(fun point -> PointF(point.x, point.y))
 
@@ -43,12 +44,12 @@ module LineChart =
         pb.AddLines points |> ignore
 
     let private addAxes pb (img:Image<_>) =
-        let x1 = (float img.Width  * 0.1) |> int
-        let y1 = (float img.Height * 0.1) |> int
-        let x2 = (float img.Width  * 0.1) |> int
-        let y2 = (float img.Height * 0.9) |> int
-        let x3 = (float img.Width  * 0.9) |> int
-        let y3 = (float img.Height * 0.9) |> int
+        let x1 = (float32 img.Width  * 0.1f)
+        let y1 = (float32 img.Height * 0.1f)
+        let x2 = (float32 img.Width  * 0.1f)
+        let y2 = (float32 img.Height * 0.9f)
+        let x3 = (float32 img.Width  * 0.9f)
+        let y3 = (float32 img.Height * 0.9f)
         let p1 = pointf x1 y1
         let p2 = pointf x2 y2
         let p3 = pointf x3 y3
@@ -83,7 +84,7 @@ module LineChart =
                 maxY = Math.Max(minMaxes.maxY, point.y)
             }) initialState
 
-    let private transformPointsToFitGrid (upperLeft:PointF) (lowerRight:PointF) firstPoint points =
+    let internal fitPointsToGrid (upperLeft:PointF) (lowerRight:PointF) firstPoint points =
         let minMaxes = getMinMaxes firstPoint points
         let pointWidth  = minMaxes.maxX.value - minMaxes.minX.value
         let pointHeight = minMaxes.maxY - minMaxes.minY
@@ -144,7 +145,7 @@ module LineChart =
 
     let private drawDataLines settings upperLeft lowerRight firstPoint chartPoints =
         let pb = PathBuilder()
-        let transformedPoints, minMaxes = transformPointsToFitGrid upperLeft lowerRight firstPoint chartPoints
+        let transformedPoints, minMaxes = fitPointsToGrid upperLeft lowerRight firstPoint chartPoints
         pb |> addLines transformedPoints
         let path = pb.Build()
         let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, path) |> ignore

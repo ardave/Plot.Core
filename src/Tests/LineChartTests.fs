@@ -1,7 +1,9 @@
 module LineChartTests
 open Xunit
 open FsUnit.Xunit
+open Plot.Core
 open Plot.Core.LineChart
+open SixLabors.Primitives
 
 [<Fact>]
 let ``getMinMaxes should get the correct min maxes``() =
@@ -18,3 +20,27 @@ let ``getMinMaxes should get the correct min maxes``() =
     minMaxes.maxX.originalValue |> should equal 7.f
     minMaxes.minY |> should equal 2.f
     minMaxes.maxY |> should equal 8.f
+
+[<Fact>]
+let ``fitPointsToGrid should fit the points correctly``() =
+    let upperLeft = pointf 150.f 50.f
+    let lowerRight = pointf 1350.f 450.f
+    let points = FakeData.hourlyDataDateTimes
+    let xpoints, _ = fitPointsToGrid upperLeft lowerRight points.[0] points
+    
+    let fartherLeftThanUpperLeft   (p:PointF) = p.X < upperLeft.X
+    let fartherUpThanUpperLeft     (p:PointF) = p.Y < upperLeft.Y
+    let fartherRightThanLowerRight (p:PointF) = p.X > lowerRight.X
+    let fartherDownThanLowerRight  (p:PointF) = p.Y > lowerRight.Y
+
+    [
+        fartherLeftThanUpperLeft
+        fartherUpThanUpperLeft
+        fartherRightThanLowerRight
+        fartherDownThanLowerRight
+    ]
+    |> List.iter (fun f ->
+        xpoints
+        |> Array.exists f
+        |> should be False
+    )
