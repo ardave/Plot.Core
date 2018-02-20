@@ -26,12 +26,12 @@ let ``fitPointsToGrid should fit the points correctly``() =
     let upperLeft = pointf 150.f 50.f
     let lowerRight = pointf 1350.f 450.f
     let points = FakeData.hourlyDataDateTimes
-    let xpoints, _ = fitPointsToGrid upperLeft lowerRight points.[0] points
+    let fittedPoints, _ = fitPointsToGrid upperLeft lowerRight points.[0] points
     
-    let fartherLeftThanUpperLeft   (p:PointF) = p.X < upperLeft.X
-    let fartherUpThanUpperLeft     (p:PointF) = p.Y < upperLeft.Y
-    let fartherRightThanLowerRight (p:PointF) = p.X > lowerRight.X
-    let fartherDownThanLowerRight  (p:PointF) = p.Y > lowerRight.Y
+    let fartherLeftThanUpperLeft   p = p.fittedX < upperLeft.X
+    let fartherUpThanUpperLeft     p = p.fittedY < upperLeft.Y
+    let fartherRightThanLowerRight p = p.fittedX > lowerRight.X
+    let fartherDownThanLowerRight  p = p.fittedY > lowerRight.Y
 
     [
         fartherLeftThanUpperLeft
@@ -40,7 +40,7 @@ let ``fitPointsToGrid should fit the points correctly``() =
         fartherDownThanLowerRight
     ]
     |> List.iter (fun f ->
-        xpoints
+        fittedPoints
         |> Array.exists f
         |> should be False
     )

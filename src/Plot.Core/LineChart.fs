@@ -14,15 +14,21 @@ module LineChart =
 
     // TODO:  Maybe make X value a type that is implicitly convertible
     // to float32, based on the constraints of the float32 function
-    type ChartPoint<'T> = {
+    type public OriginalPoint<'T> = {
         // Original value for UI/Rendering/Display purposes
         originalX : 'T
         // the actual value used for mathematical comparisons
         // and chart rendering/scaling purposes.
         x : float32
         y : float32
-    } 
+    } with member this.ToPointF = PointF(this.x, this.y)
 
+    type internal FittedPoint ={
+        fittedX : float32
+        fittedY : float32
+    } with member this.ToPointF = PointF(this.fittedX, this.fittedY)
+
+    
     type internal MinMax<'T> = {
         value : float32
         originalValue : 'T
@@ -38,10 +44,15 @@ module LineChart =
     type ImageMutation = IImageProcessingContext<Rgba32> -> unit
     let internal pointf x y = PointF(x, y)
     let private addLine p1 p2 (pb:PathBuilder) = pb.AddLine(p1, p2) |> ignore
+    let private addLineO (p1:OriginalPoint<'T>) (p2:OriginalPoint<'T>) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
+    let private addLineF (p1:FittedPoint) (p2:FittedPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
     let private pointsToPoints points = points |> Array.map(fun point -> PointF(point.x, point.y))
 
     let private addLines (points:PointF array) (pb:PathBuilder) =
         pb.AddLines points |> ignore
+    let private addLinesF (points:FittedPoint array) (pb:PathBuilder) =
+        let pointFs = points |> Array.map (fun p -> p.ToPointF)
+        addLines pointFs pb
 
     let private addAxes pb (img:Image<_>) =
         let x1 = (float32 img.Width  * 0.1f)
@@ -58,7 +69,7 @@ module LineChart =
 
     let private pointToMinMax point = { originalValue = point.originalX; value = point.x }
 
-    let internal getMinMaxes (firstPoint:ChartPoint<'T>) points =
+    let internal getMinMaxes (firstPoint:OriginalPoint<'T>) points =
         let initialState =
             {
                 minX = 
@@ -91,14 +102,17 @@ module LineChart =
         let chartWidth  = lowerRight.X - upperLeft.X
         let chartHeight = lowerRight.Y - upperLeft.Y
 
-        let transformedPoints =
+        let fittedPoints =
             points
             |> Array.map(fun point ->
                 let pctW = (point.x - minMaxes.minX.value) / pointWidth
                 let pctH = (minMaxes.maxY - point.y) / pointHeight
-                PointF(pctW * chartWidth + upperLeft.X, pctH * chartHeight + upperLeft.Y)
+                { 
+                    fittedX = pctW * chartWidth + upperLeft.X
+                    fittedY = pctH * chartHeight + upperLeft.Y
+                }
             )
-        transformedPoints, minMaxes
+        fittedPoints, minMaxes
 
     let private drawMaxY minMaxes (upperLeft:PointF) (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
         let maxYStr = minMaxes.maxY.ToString()
@@ -145,18 +159,21 @@ module LineChart =
 
     let private drawDataLines settings upperLeft lowerRight firstPoint chartPoints =
         let pb = PathBuilder()
-        let transformedPoints, minMaxes = fitPointsToGrid upperLeft lowerRight firstPoint chartPoints
-        pb |> addLines transformedPoints
+        let fittedPoints, minMaxes = fitPointsToGrid upperLeft lowerRight firstPoint chartPoints
+        pb |> addLinesF fittedPoints
         let path = pb.Build()
         let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, path) |> ignore
         drawFunc, minMaxes
 
-    let private drawGridLines settings img =
+    let private drawMajorGridLines settings img =
         let pbAxes = PathBuilder()
         let upperLeft, lowerRight = img |> addAxes pbAxes
         let path = pbAxes.Build()
         let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.GridLineStyle.Color, settings.GridLineStyle.Thickness, path) |> ignore
         upperLeft, lowerRight, drawFunc
+
+    let drawMinorGridLines =
+        ()
 
     let private drawTitle settings (ctx:IImageProcessingContext<Rgba32>) =
         let pb = PathBuilder()
@@ -172,14 +189,13 @@ module LineChart =
         let path = pb.Build()
         ctx.DrawText(settings.Title, settings.Font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
 
-
-    let createLineChart settings (chartPoints:ChartPoint<'T> array) =
+    let createLineChart settings (chartPoints:OriginalPoint<'T> array) =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
-        let upperLeft, lowerRight, drawGridLinesFunc = drawGridLines settings img
+        let upperLeft, lowerRight, drawMajorGridLinesFunc = drawMajorGridLines settings img
 
         let backgroundMutations = [
             fillBackground
-            drawGridLinesFunc
+            drawMajorGridLinesFunc
             drawTitle settings
         ]
 
