@@ -6,6 +6,7 @@ namespace Plot.Core.LineChart
         open SixLabors.Primitives
         open SixLabors.Shapes
         open Plot.Core
+        open Plot.Core.Settings
         open LineChart.Calculation
 
         let internal fittedToOriginal f = { x = f.fittedX; y = f.fittedY; originalX = f.fittedX }
@@ -24,6 +25,19 @@ namespace Plot.Core.LineChart
         let internal addLinesF (points:FittedPoint array) (pb:PathBuilder) =
             let pointFs = points |> Array.map fittedToOriginal
             addLines pointFs pb
+
+        let private addAxes pb (img:Image<_>) =
+            let x1 = (float img.Width  * 0.1)
+            let y1 = (float img.Height * 0.1)
+            let x2 = (float img.Width  * 0.1)
+            let y2 = (float img.Height * 0.9)
+            let x3 = (float img.Width  * 0.9)
+            let y3 = (float img.Height * 0.9)
+            let p1 = { x = x1; y = y1; originalX = x1 }
+            let p2 = { x = x2; y = y2; originalX = x2 }
+            let p3 = { x = x3; y = y3; originalX = x3 }
+            pb |> addLines [|p1; p2; p3|]
+            p1, p3
 
         let internal drawMaxY minMaxes upperLeft (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
             let maxYStr = minMaxes.maxY.ToString()
@@ -58,3 +72,27 @@ namespace Plot.Core.LineChart
             pbText4.AddLine(p5, p6) |> ignore
             let path = pbText4.Build()
             ctx.DrawText(maxXStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+
+        let internal fillBackground (ctx:IImageProcessingContext<Rgba32>) =
+            ctx.Fill(Rgba32.White) |> ignore
+
+        let internal withPathBuilder f =
+            let pb = PathBuilder()
+            let result = f()
+            let path = pb.Build()
+            result, path
+
+        let internal drawDataLines settings upperLeft lowerRight firstPoint chartPoints =
+            let pb = PathBuilder()
+            let fittedPoints, minMaxes = fitPointsToGrid upperLeft lowerRight firstPoint chartPoints
+            pb |> addLinesF fittedPoints
+            let path = pb.Build()
+            let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, path) |> ignore
+            drawFunc, minMaxes
+
+        let internal drawMajorGridLines settings img =
+            let pbAxes = PathBuilder()
+            let upperLeft, lowerRight = img |> addAxes pbAxes
+            let path = pbAxes.Build()
+            let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.GridLineStyle.Color, settings.GridLineStyle.Thickness, path) |> ignore
+            upperLeft, lowerRight, drawFunc

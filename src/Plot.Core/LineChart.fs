@@ -16,43 +16,6 @@ module LineChart =
     open Plot.Core.LineChart.Rendering
     open Plot.Core.Settings
 
-    let private addAxes pb (img:Image<_>) =
-        let x1 = (float img.Width  * 0.1)
-        let y1 = (float img.Height * 0.1)
-        let x2 = (float img.Width  * 0.1)
-        let y2 = (float img.Height * 0.9)
-        let x3 = (float img.Width  * 0.9)
-        let y3 = (float img.Height * 0.9)
-        let p1 = { x = x1; y = y1; originalX = x1 }
-        let p2 = { x = x2; y = y2; originalX = x2 }
-        let p3 = { x = x3; y = y3; originalX = x3 }
-        pb |> addLines [|p1; p2; p3|]
-        p1, p3
-
-    let private fillBackground (ctx:IImageProcessingContext<Rgba32>) =
-        ctx.Fill(Rgba32.White) |> ignore
-
-    let private withPathBuilder f =
-        let pb = PathBuilder()
-        let result = f()
-        let path = pb.Build()
-        result, path
-
-    let private drawDataLines settings upperLeft lowerRight firstPoint chartPoints =
-        let pb = PathBuilder()
-        let fittedPoints, minMaxes = fitPointsToGrid upperLeft lowerRight firstPoint chartPoints
-        pb |> addLinesF fittedPoints
-        let path = pb.Build()
-        let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, path) |> ignore
-        drawFunc, minMaxes
-
-    let private drawMajorGridLines settings img =
-        let pbAxes = PathBuilder()
-        let upperLeft, lowerRight = img |> addAxes pbAxes
-        let path = pbAxes.Build()
-        let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.GridLineStyle.Color, settings.GridLineStyle.Thickness, path) |> ignore
-        upperLeft, lowerRight, drawFunc
-
     let internal calcMinorGridLineIncrement maxValue numGridLines =
         let rec getIncrement input multiplier =
             match input with
