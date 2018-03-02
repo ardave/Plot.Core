@@ -42,3 +42,22 @@ namespace Plot.Core.LineChart
                     maxX = if point.x > minMaxes.maxX.value then pointToMinMax point else minMaxes.maxX
                     maxY = Math.Max(minMaxes.maxY, point.y)
                 }) initialState
+
+        let internal fitPointsToGrid upperLeft lowerRight firstPoint points =
+            let minMaxes = getMinMaxes firstPoint points
+            let pointWidth  = minMaxes.maxX.value - minMaxes.minX.value
+            let pointHeight = minMaxes.maxY - minMaxes.minY
+            let chartWidth  = lowerRight.x - upperLeft.x
+            let chartHeight = lowerRight.y - upperLeft.y
+
+            let fittedPoints =
+                points
+                |> Array.map(fun point ->
+                    let pctW = (point.x - minMaxes.minX.value) / pointWidth
+                    let pctH = (minMaxes.maxY - point.y) / pointHeight
+                    { 
+                        fittedX = pctW * chartWidth + upperLeft.x
+                        fittedY = pctH * chartHeight + upperLeft.y
+                    }
+                )
+            fittedPoints, minMaxes
