@@ -1,7 +1,6 @@
 namespace Plot.Core
 
 module Settings =
-    open System
     open SixLabors.ImageSharp
     open SixLabors.Fonts
 

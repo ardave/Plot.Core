@@ -188,27 +188,30 @@ module LineChart =
             | _ -> Math.Ceiling(float input) * multiplier
         getIncrement (maxValue / float numGridLines) 1.
 
-    let internal getMinorGridLinesPoints (upperLeft:PointF) (lowerRight:PointF) increment numLines =
+    let internal getMinorGridLinesPoints upperLeft lowerRight increment numLines =
         [0.. numLines]
         |> List.map(fun n ->
-            let x1 = upperLeft.X
-            let y1 = lowerRight.Y - float32 increment * float32 n
-            let x2 = lowerRight.X
+            let x1 = upperLeft.x
+            let y1 = lowerRight.y - increment * float n
+            let x2 = lowerRight.x
             let y2 = y1
-            let newStart = pointf x1 y1
-            let newEnd   = pointf x2 y2
+            let newStart = { x = x1; y = y1; originalX = x1 }
+            let newEnd   = { x = x2; y = y2; originalX = x2 }
             newStart, newEnd
         )
 
     let internal drawMinorGridLines minorGridLinesEndPoints settings (ctx:IImageProcessingContext<Rgba32>) =
         let pb = PathBuilder()
         minorGridLinesEndPoints
+        |> List.map (fun (x, y) ->
+            printfn "x: %A, y: %A" x y
+            originalToPointF x, originalToPointF y)
         |> List.iter (fun (x, y) -> pb.AddLine(x, y) |> ignore)
         ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, pb.Build()) |> ignore
 
     let glueMinorGridLinesFunctions maxValue upperLeft lowerRight settings =
         match settings.XAxisGridLines with
-        | None -> fun (_:IImageProcessingContext<Rgba32>) -> ()
+        | None -> ignore
         | Some numLines ->
             let increment = calcMinorGridLineIncrement maxValue numLines
             let minorGridLinePoints = getMinorGridLinesPoints upperLeft lowerRight increment numLines
@@ -243,7 +246,7 @@ module LineChart =
         | None -> None
         | Some firstPoint ->
             let drawDataLinesFunc, minMaxes = drawDataLines settings upperLeft lowerRight firstPoint chartPoints
-            let drawMinorGridLinesFunc = glueMinorGridLinesFunctions minMaxes.maxX.value
+            let drawMinorGridLinesFunc = glueMinorGridLinesFunctions minMaxes.maxX.value upperLeft lowerRight settings
 
             let allMutations = backgroundMutations @ [
                                             drawDataLinesFunc
@@ -251,6 +254,7 @@ module LineChart =
                                             drawMinX minMaxes upperLeft lowerRight settings.Font
                                             drawMinY minMaxes upperLeft lowerRight settings.Font
                                             drawMaxY minMaxes upperLeft settings.Font
+                                            drawMinorGridLinesFunc
                                         ]
 
             img.Mutate(fun ctx ->
