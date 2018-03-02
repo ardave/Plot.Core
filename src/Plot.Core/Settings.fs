@@ -24,6 +24,8 @@ module Settings =
         RenderingStyle : RenderingStyle
         GridLineStyle  : LineStyle
         DataLineStyle  : LineStyle
+        XAxisGridLines : int option
+        YAxisGridLines : int option
     }
 
     let internal calculateFontSize chartWidth =
@@ -42,4 +44,6 @@ module Settings =
             RenderingStyle = Lines
             GridLineStyle  = { Color = Rgba32.Black;  Thickness = 3.f }
             DataLineStyle  = { Color = Rgba32.Orange; Thickness = 2.f }
+            XAxisGridLines = Some 5
+            YAxisGridLines = Some 10
         }

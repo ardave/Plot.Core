@@ -151,7 +151,7 @@ module FakeData =
         461
         390
         432
-        |] |> Array.mapi(fun i x -> { x = float32 i; y = float32 x; originalX = i})
+        |] |> Array.mapi(fun i x -> { x = float i; y = float x; originalX = i})
 
     let hourlyDataDateTimes =
         [|
@@ -299,5 +299,5 @@ module FakeData =
         "1960-10",461
         "1960-11",390
         "1960-12",432
-        |] |> Array.map(fun (x, y) -> { x = float32 <| DateTime.Parse(x).Ticks; y = float32 y; originalX = x } )
+        |] |> Array.map(fun (x, y) -> { x = float <| DateTime.Parse(x).Ticks; y = float y; originalX = x } )
 

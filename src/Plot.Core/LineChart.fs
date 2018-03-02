@@ -19,51 +19,57 @@ module LineChart =
         originalX : 'T
         // the actual value used for mathematical comparisons
         // and chart rendering/scaling purposes.
-        x : float32
-        y : float32
-    } with member this.ToPointF = PointF(this.x, this.y)
+        x : float
+        y : float
+    }
+
+    let originalToPointF o = PointF(float32 o.x, float32 o.y)
 
     type internal FittedPoint ={
-        fittedX : float32
-        fittedY : float32
-    } with member this.ToPointF = PointF(this.fittedX, this.fittedY)
+        fittedX : float
+        fittedY : float
+    } with member this.ToPointF = PointF(float32 this.fittedX, float32 this.fittedY)
 
-    
     type internal MinMax<'T> = {
-        value : float32
+        value : float
         originalValue : 'T
     }
 
     type internal MinMaxes<'T> = {
         minX : MinMax<'T>
         maxX : MinMax<'T>
-        minY : float32
-        maxY : float32
+        minY : float
+        maxY : float
     }
 
     type ImageMutation = IImageProcessingContext<Rgba32> -> unit
     let internal pointf x y = PointF(x, y)
     let private addLine p1 p2 (pb:PathBuilder) = pb.AddLine(p1, p2) |> ignore
-    let private addLineO (p1:OriginalPoint<'T>) (p2:OriginalPoint<'T>) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
     let private addLineF (p1:FittedPoint) (p2:FittedPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
-    let private pointsToPoints points = points |> Array.map(fun point -> PointF(point.x, point.y))
 
-    let private addLines (points:PointF array) (pb:PathBuilder) =
-        pb.AddLines points |> ignore
+    let private addLines points (pb:PathBuilder) =
+        points
+        |> Array.map originalToPointF
+        |> Seq.ofArray
+        |> pb.AddLines
+        |> ignore
+
+    let internal fittedToOriginal f = { x = f.fittedX; y = f.fittedY; originalX = f.fittedX }
+
     let private addLinesF (points:FittedPoint array) (pb:PathBuilder) =
-        let pointFs = points |> Array.map (fun p -> p.ToPointF)
+        let pointFs = points |> Array.map fittedToOriginal
         addLines pointFs pb
 
     let private addAxes pb (img:Image<_>) =
-        let x1 = (float32 img.Width  * 0.1f)
-        let y1 = (float32 img.Height * 0.1f)
-        let x2 = (float32 img.Width  * 0.1f)
-        let y2 = (float32 img.Height * 0.9f)
-        let x3 = (float32 img.Width  * 0.9f)
-        let y3 = (float32 img.Height * 0.9f)
-        let p1 = pointf x1 y1
-        let p2 = pointf x2 y2
-        let p3 = pointf x3 y3
+        let x1 = (float img.Width  * 0.1)
+        let y1 = (float img.Height * 0.1)
+        let x2 = (float img.Width  * 0.1)
+        let y2 = (float img.Height * 0.9)
+        let x3 = (float img.Width  * 0.9)
+        let y3 = (float img.Height * 0.9)
+        let p1 = { x = x1; y = y1; originalX = x1 }
+        let p2 = { x = x2; y = y2; originalX = x2 }
+        let p3 = { x = x3; y = y3; originalX = x3 }
         pb |> addLines [|p1; p2; p3|]
         p1, p3
 
@@ -95,12 +101,12 @@ module LineChart =
                 maxY = Math.Max(minMaxes.maxY, point.y)
             }) initialState
 
-    let internal fitPointsToGrid (upperLeft:PointF) (lowerRight:PointF) firstPoint points =
+    let internal fitPointsToGrid upperLeft lowerRight firstPoint points =
         let minMaxes = getMinMaxes firstPoint points
         let pointWidth  = minMaxes.maxX.value - minMaxes.minX.value
         let pointHeight = minMaxes.maxY - minMaxes.minY
-        let chartWidth  = lowerRight.X - upperLeft.X
-        let chartHeight = lowerRight.Y - upperLeft.Y
+        let chartWidth  = lowerRight.x - upperLeft.x
+        let chartHeight = lowerRight.y - upperLeft.y
 
         let fittedPoints =
             points
@@ -108,42 +114,42 @@ module LineChart =
                 let pctW = (point.x - minMaxes.minX.value) / pointWidth
                 let pctH = (minMaxes.maxY - point.y) / pointHeight
                 { 
-                    fittedX = pctW * chartWidth + upperLeft.X
-                    fittedY = pctH * chartHeight + upperLeft.Y
+                    fittedX = pctW * chartWidth + upperLeft.x
+                    fittedY = pctH * chartHeight + upperLeft.y
                 }
             )
         fittedPoints, minMaxes
 
-    let private drawMaxY minMaxes (upperLeft:PointF) (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
+    let private drawMaxY minMaxes upperLeft (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
         let maxYStr = minMaxes.maxY.ToString()
         let pbText2 = PathBuilder()
-        let p1 = PointF(upperLeft.X - font.Size * float32 maxYStr.Length, upperLeft.Y)
-        let p2 = PointF(upperLeft.X, upperLeft.Y)
+        let p1 = PointF(float32 upperLeft.x - font.Size * float32 maxYStr.Length, float32 upperLeft.y)
+        let p2 = PointF(float32 upperLeft.x, float32 upperLeft.y)
         pbText2.AddLine(p1, p2) |> ignore
         let path = pbText2.Build()
         ctx.DrawText(maxYStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
 
-    let private drawMinY minMaxes (upperLeft:PointF) (lowerRight:PointF) (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
+    let private drawMinY minMaxes upperLeft lowerRight (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
         let minYStr = minMaxes.minY.ToString()
         let pbText = PathBuilder()
-        pbText.AddLine(PointF(upperLeft.X - font.Size * float32 minYStr.Length, lowerRight.Y), lowerRight) |> ignore
+        pbText.AddLine(PointF(float32 upperLeft.x - font.Size * float32 minYStr.Length, float32 lowerRight.y), lowerRight |> originalToPointF) |> ignore
         let path = pbText.Build()
         ctx.DrawText(minYStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length))  |> ignore
 
-    let private drawMinX minMaxes (upperLeft:PointF) (lowerRight:PointF) (font:Font) (ctx:IImageProcessingContext<Rgba32>) = 
+    let private drawMinX minMaxes upperLeft lowerRight (font:Font) (ctx:IImageProcessingContext<Rgba32>) = 
         let minXStr = minMaxes.minX.originalValue.ToString()
         let pb = PathBuilder()
-        let p3 = PointF(upperLeft.X,  lowerRight.Y + font.Size)
-        let p4 = PointF(lowerRight.X, lowerRight.Y + font.Size)
+        let p3 = PointF(float32 upperLeft.x , float32 lowerRight.y + font.Size)
+        let p4 = PointF(float32 lowerRight.x, float32 lowerRight.y + font.Size)
         pb.AddLine(p3, p4) |> ignore
         let path = pb.Build()
         ctx.DrawText(minXStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
 
-    let private drawMaxX minMaxes (lowerRight:PointF) (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
+    let private drawMaxX minMaxes lowerRight (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
         let maxXStr = minMaxes.maxX.originalValue.ToString()
         let pbText4 = PathBuilder()
-        let p5 = PointF(lowerRight.X - font.Size * float32 maxXStr.Length * 0.5f, lowerRight.Y + font.Size)
-        let p6 = PointF(lowerRight.X + font.Size * float32 maxXStr.Length * 0.5f, lowerRight.Y + font.Size)
+        let p5 = PointF(float32 lowerRight.x - font.Size * float32 maxXStr.Length * 0.5f, float32 lowerRight.y + font.Size)
+        let p6 = PointF(float32 lowerRight.x + font.Size * float32 maxXStr.Length * 0.5f, float32 lowerRight.y + font.Size)
         pbText4.AddLine(p5, p6) |> ignore
         let path = pbText4.Build()
         ctx.DrawText(maxXStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
@@ -172,20 +178,54 @@ module LineChart =
         let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.GridLineStyle.Color, settings.GridLineStyle.Thickness, path) |> ignore
         upperLeft, lowerRight, drawFunc
 
-    let drawMinorGridLines =
-        ()
+    let internal calcMinorGridLineIncrement maxValue numGridLines =
+        let rec getIncrement input multiplier =
+            match input with
+            | i when i > 10. ->
+                getIncrement (i / 10.) (multiplier * 10.)
+            | i when i <= 1. ->
+                getIncrement (i * 10.) (multiplier / 10.)
+            | _ -> Math.Ceiling(float input) * multiplier
+        getIncrement (maxValue / float numGridLines) 1.
 
-    let private drawTitle settings (ctx:IImageProcessingContext<Rgba32>) =
+    let internal getMinorGridLinesPoints (upperLeft:PointF) (lowerRight:PointF) increment numLines =
+        [0.. numLines]
+        |> List.map(fun n ->
+            let x1 = upperLeft.X
+            let y1 = lowerRight.Y - float32 increment * float32 n
+            let x2 = lowerRight.X
+            let y2 = y1
+            let newStart = pointf x1 y1
+            let newEnd   = pointf x2 y2
+            newStart, newEnd
+        )
+
+    let internal drawMinorGridLines minorGridLinesEndPoints settings (ctx:IImageProcessingContext<Rgba32>) =
         let pb = PathBuilder()
-        pb.ResetOrigin() |> ignore
+        minorGridLinesEndPoints
+        |> List.iter (fun (x, y) -> pb.AddLine(x, y) |> ignore)
+        ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, pb.Build()) |> ignore
+
+    let glueMinorGridLinesFunctions maxValue upperLeft lowerRight settings =
+        match settings.XAxisGridLines with
+        | None -> fun (_:IImageProcessingContext<Rgba32>) -> ()
+        | Some numLines ->
+            let increment = calcMinorGridLineIncrement maxValue numLines
+            let minorGridLinePoints = getMinorGridLinesPoints upperLeft lowerRight increment numLines
+            drawMinorGridLines minorGridLinePoints settings
+
+    let internal calculateTitleLocation settings =
         let starting = float32 settings.Width / 2.f
         let y = float32 settings.Height * 0.1f
         let titleWidth = float32 settings.Title.Length * settings.Font.Size
-        let p5 = PointF(starting - titleWidth * 0.25f, y)
-        let p6 = PointF(starting + titleWidth * 0.75f, y)
+        let pStart = PointF(starting - titleWidth * 0.25f, y)
+        let pEnd   = PointF(starting + titleWidth * 0.75f, y)
+        pStart, pEnd
 
-        pb.AddLine(p5, p6) |> ignore
-        pb.ResetOrigin() |> ignore
+    let private drawTitle settings (ctx:IImageProcessingContext<Rgba32>) =
+        let pb = PathBuilder()
+        let pStart, pEnd = calculateTitleLocation settings
+        pb.AddLine(pStart, pEnd) |> ignore
         let path = pb.Build()
         ctx.DrawText(settings.Title, settings.Font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
 
@@ -203,6 +243,7 @@ module LineChart =
         | None -> None
         | Some firstPoint ->
             let drawDataLinesFunc, minMaxes = drawDataLines settings upperLeft lowerRight firstPoint chartPoints
+            let drawMinorGridLinesFunc = glueMinorGridLinesFunctions minMaxes.maxX.value
 
             let allMutations = backgroundMutations @ [
                                             drawDataLinesFunc
