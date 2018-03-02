@@ -3,7 +3,6 @@ open Xunit
 open FsUnit.Xunit
 open Plot.Core
 open Plot.Core.LineChart
-open SixLabors.Primitives
 
 let shouldEqual expected actual =
     if actual <> expected then
@@ -21,7 +20,6 @@ let ``getMinMaxes should get the correct min maxes``() =
     let minMaxes = chartPoints |> getMinMaxes chartPoints.[0]
 
     minMaxes.minX.originalValue |> shouldEqual 1.f
-
     minMaxes.minX.originalValue |> shouldEqual 1.f
     minMaxes.maxX.originalValue |> shouldEqual 7.f
     minMaxes.minY |> shouldEqual 2.

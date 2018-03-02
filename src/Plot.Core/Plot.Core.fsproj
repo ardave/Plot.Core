@@ -7,6 +7,8 @@
   <ItemGroup>
     <Compile Include="Array.fs" />
     <Compile Include="Settings.fs" />
+    <Compile Include="LineChart.Calculation.fs" />
+    <Compile Include="LineChart.Rendering.fs" />
     <Compile Include="LineChart.fs" />
     <Compile Include="FakeData.fs" />
     <Compile Include="Program.fs" />
