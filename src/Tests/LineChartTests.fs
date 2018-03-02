@@ -29,6 +29,11 @@ let ``getMinMaxes should get the correct min maxes``() =
     minMaxes.maxY |> shouldEqual 8.
 
 [<Fact>]
+let ``getMinMaxes from air passenger data``() =
+    let minMax = FakeData.hourlyDataDateTimes |> getMinMaxes FakeData.hourlyDataDateTimes.[0]
+    printfn "minMax: %A" minMax
+
+[<Fact>]
 let ``fitPointsToGrid should fit the points correctly``() =
     let upperLeft  = { x = 150.;  y = 50.; originalX  = 150.  }
     let lowerRight = { x = 1350.; y = 450.; originalX = 1350. }
