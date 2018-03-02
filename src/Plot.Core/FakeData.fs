@@ -3,7 +3,7 @@ namespace Plot.Core
 module FakeData =
 
     open System
-    open LineChart
+    open Plot.Core.LineChart
 
     let hourlyDataInts =
         [|

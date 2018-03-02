@@ -12,6 +12,7 @@ module LineChart =
 
     open Calculation
     open Rendering
+    open Plot.Core
     open Plot.Core.Settings
 
     type ImageMutation = IImageProcessingContext<Rgba32> -> unit

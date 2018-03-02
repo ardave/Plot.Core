@@ -2,8 +2,9 @@ module LineChartTests
 open Xunit
 open FsUnit.Xunit
 open Plot.Core
-open Plot.Core.LineChart
 open Plot.Core.LineChart.Calculation
+open Plot.Core.LineChart.LineChart
+open Plot.Core.LineChart.Rendering
 
 let shouldEqual expected actual =
     if actual <> expected then
@@ -18,6 +19,7 @@ let ``getMinMaxes should get the correct min maxes``() =
             { originalX = 7.f; x = 7.; y = 8. }
         |]
 
+    
     let minMaxes = chartPoints |> getMinMaxes chartPoints.[0]
 
     minMaxes.minX.originalValue |> shouldEqual 1.f
@@ -62,7 +64,7 @@ let ``get minor grid lines increment``() =
         95300.  , 20000.
     |]
     |> Array.iter(fun (max, expected) ->
-        LineChart.calcMinorGridLineIncrement max numberOfGridLines
+        calcMinorGridLineIncrement max numberOfGridLines
         |> should (equalWithin 0.0001) expected
     )
 

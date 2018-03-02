@@ -1,6 +1,6 @@
 ﻿open System.Runtime.CompilerServices
 open SixLabors.ImageSharp
-open Plot.Core.LineChart
+open Plot.Core.LineChart.LineChart
 open Plot.Core.Settings
 
 [<assembly: InternalsVisibleTo("Tests")>]
