@@ -96,3 +96,19 @@ namespace Plot.Core.LineChart
             let path = pbAxes.Build()
             let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.GridLineStyle.Color, settings.GridLineStyle.Thickness, path) |> ignore
             upperLeft, lowerRight, drawFunc
+
+        let internal drawMinorGridLines minorGridLinesEndPoints settings (ctx:IImageProcessingContext<Rgba32>) =
+            let pb = PathBuilder()
+            minorGridLinesEndPoints
+            |> List.map (fun (x, y) ->
+                printfn "x: %A, y: %A" x y
+                originalToPointF x, originalToPointF y)
+            |> List.iter (fun (x, y) -> pb.AddLine(x, y) |> ignore)
+            ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, pb.Build()) |> ignore
+
+        let internal drawTitle settings (ctx:IImageProcessingContext<Rgba32>) =
+            let pb = PathBuilder()
+            let pStart, pEnd = calculateTitleLocation settings
+            pb.AddLine(pStart, pEnd) |> ignore
+            let path = pb.Build()
+            ctx.DrawText(settings.Title, settings.Font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
