@@ -1,4 +1,4 @@
-namespace Plot.Core
+namespace Plot.Core.LineChart
 
 module LineChart =
 
@@ -10,37 +10,9 @@ module LineChart =
     open SixLabors.Fonts
     open SixLabors.ImageSharp.Drawing
 
-    open Settings
-
-    // TODO:  Maybe make X value a type that is implicitly convertible
-    // to float32, based on the constraints of the float32 function
-    type public OriginalPoint<'T> = {
-        // Original value for UI/Rendering/Display purposes
-        originalX : 'T
-        // the actual value used for mathematical comparisons
-        // and chart rendering/scaling purposes.
-        x : float
-        y : float
-    }
-
-    let originalToPointF o = PointF(float32 o.x, float32 o.y)
-
-    type internal FittedPoint ={
-        fittedX : float
-        fittedY : float
-    } with member this.ToPointF = PointF(float32 this.fittedX, float32 this.fittedY)
-
-    type internal MinMax<'T> = {
-        value : float
-        originalValue : 'T
-    }
-
-    type internal MinMaxes<'T> = {
-        minX : MinMax<'T>
-        maxX : MinMax<'T>
-        minY : float
-        maxY : float
-    }
+    open Calculation
+    open Rendering
+    open Plot.Core.Settings
 
     type ImageMutation = IImageProcessingContext<Rgba32> -> unit
     let internal pointf x y = PointF(x, y)
@@ -209,7 +181,7 @@ module LineChart =
         |> List.iter (fun (x, y) -> pb.AddLine(x, y) |> ignore)
         ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, pb.Build()) |> ignore
 
-    let glueMinorGridLinesFunctions maxValue upperLeft lowerRight settings =
+    let internal glueMinorGridLinesFunctions maxValue upperLeft lowerRight settings =
         match settings.XAxisGridLines with
         | None -> ignore
         | Some numLines ->

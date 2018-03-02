@@ -3,6 +3,7 @@ open Xunit
 open FsUnit.Xunit
 open Plot.Core
 open Plot.Core.LineChart
+open Plot.Core.LineChart.Calculation
 
 let shouldEqual expected actual =
     if actual <> expected then

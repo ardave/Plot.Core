@@ -1,3 +1,14 @@
-module internal LineChart.Calculation
+namespace Plot.Core.LineChart
+    module internal Calculation =
 
-let foo = 7
+        type internal MinMax<'T> = {
+            value : float
+            originalValue : 'T
+        }
+        
+        type internal MinMaxes<'T> = {
+            minX : MinMax<'T>
+            maxX : MinMax<'T>
+            minY : float
+            maxY : float
+        }
