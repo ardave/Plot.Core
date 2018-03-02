@@ -13,25 +13,8 @@ module LineChart =
     open Calculation
     open Rendering
     open Plot.Core
+    open Plot.Core.LineChart.Rendering
     open Plot.Core.Settings
-
-    type ImageMutation = IImageProcessingContext<Rgba32> -> unit
-    let internal pointf x y = PointF(x, y)
-    let private addLine p1 p2 (pb:PathBuilder) = pb.AddLine(p1, p2) |> ignore
-    let private addLineF (p1:FittedPoint) (p2:FittedPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
-
-    let private addLines points (pb:PathBuilder) =
-        points
-        |> Array.map originalToPointF
-        |> Seq.ofArray
-        |> pb.AddLines
-        |> ignore
-
-    let internal fittedToOriginal f = { x = f.fittedX; y = f.fittedY; originalX = f.fittedX }
-
-    let private addLinesF (points:FittedPoint array) (pb:PathBuilder) =
-        let pointFs = points |> Array.map fittedToOriginal
-        addLines pointFs pb
 
     let private addAxes pb (img:Image<_>) =
         let x1 = (float img.Width  * 0.1)
@@ -46,33 +29,6 @@ module LineChart =
         pb |> addLines [|p1; p2; p3|]
         p1, p3
 
-    let private pointToMinMax point = { originalValue = point.originalX; value = point.x }
-
-    let internal getMinMaxes (firstPoint:OriginalPoint<'T>) points =
-        let initialState =
-            {
-                minX = 
-                    {
-                        value = firstPoint.x
-                        originalValue = firstPoint.originalX
-                    }
-                maxX =
-                    {
-                        value = firstPoint.x
-                        originalValue = firstPoint.originalX
-                    }
-                minY = firstPoint.y
-                maxY = firstPoint.y
-            }
-
-        points
-        |> Array.fold (fun minMaxes point ->
-            {
-                minX = if point.x < minMaxes.minX.value then pointToMinMax point else minMaxes.minX
-                minY = Math.Min(minMaxes.minY, point.y)
-                maxX = if point.x > minMaxes.maxX.value then pointToMinMax point else minMaxes.maxX
-                maxY = Math.Max(minMaxes.maxY, point.y)
-            }) initialState
 
     let internal fitPointsToGrid upperLeft lowerRight firstPoint points =
         let minMaxes = getMinMaxes firstPoint points
