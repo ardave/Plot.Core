@@ -8,7 +8,7 @@ open Plot.Core.LineChart.Rendering
 
 let shouldEqual expected actual =
     if actual <> expected then
-        printfn "Expected %A but was %A" expected actual
+        failwithf "Expected %A but was %A" expected actual
 
 [<Fact>]
 let ``getMinMaxes should get the correct min maxes``() =
@@ -67,4 +67,27 @@ let ``get minor grid lines increment``() =
         calcMinorGridLineIncrement max numberOfGridLines
         |> should (equalWithin 0.0001) expected
     )
+
+[<Fact>]
+let ``get minor grid lines increment from fake data``() =
+    let max =
+        FakeData.hourlyDataDateTimes
+        |> Array.map (fun x -> x.x)
+        |> Array.max
+
+    let increment = calcMinorGridLineIncrement max 5
+    increment |> shouldEqual 17.
+    ()
+
+[<Fact>]
+let ``get Minor grid lines points``() = 
+    let upperLeft  = { x = 100.; y = 100.; originalX = 100. }
+    let lowerRight = { x = 900.; y = 900.; originalX = 900. }
+    let numLines   = 5
+    let increment  = 10.
+    let x = calcMinorGridLinesPoints upperLeft lowerRight numLines increment
+
+    let printATuple (st, nd) = printfn "From (%f, %f) to (%f, %f)" st.x st.y nd.x nd.y
+    x |> List.iter printATuple
+
 

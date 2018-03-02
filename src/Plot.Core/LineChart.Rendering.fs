@@ -97,7 +97,7 @@ namespace Plot.Core.LineChart
             let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.GridLineStyle.Color, settings.GridLineStyle.Thickness, path) |> ignore
             upperLeft, lowerRight, drawFunc
 
-        let internal drawMinorGridLines minorGridLinesEndPoints settings (ctx:IImageProcessingContext<Rgba32>) =
+        let internal drawMinorGridLines settings minorGridLinesEndPoints (ctx:IImageProcessingContext<Rgba32>) =
             let pb = PathBuilder()
             minorGridLinesEndPoints
             |> List.map (fun (x, y) ->

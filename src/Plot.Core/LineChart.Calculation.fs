@@ -47,6 +47,7 @@ namespace Plot.Core.LineChart
 
         let internal fitPointsToGrid upperLeft lowerRight firstPoint points =
             let minMaxes = getMinMaxes firstPoint points
+            printfn "minMaxes %A" minMaxes
             let pointWidth  = minMaxes.maxX.value - minMaxes.minX.value
             let pointHeight = minMaxes.maxY - minMaxes.minY
             let chartWidth  = lowerRight.x - upperLeft.x
@@ -65,6 +66,7 @@ namespace Plot.Core.LineChart
             fittedPoints, minMaxes
 
         let internal calcMinorGridLineIncrement maxValue numGridLines =
+            printfn "maxValue is %f and numGridLines = %i" maxValue numGridLines
             let rec getIncrement input multiplier =
                 match input with
                 | i when i > 10. ->
@@ -74,7 +76,8 @@ namespace Plot.Core.LineChart
                 | _ -> Math.Ceiling(float input) * multiplier
             getIncrement (maxValue / float numGridLines) 1.
 
-        let internal getMinorGridLinesPoints upperLeft lowerRight increment numLines =
+        let internal calcMinorGridLinesPoints upperLeft lowerRight numLines increment =
+            printfn "increment is %f and numlines is %i" increment numLines
             [0.. numLines]
             |> List.map(fun n ->
                 let x1 = upperLeft.x

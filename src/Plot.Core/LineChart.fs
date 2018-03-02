@@ -16,13 +16,16 @@ module LineChart =
     open Plot.Core.LineChart.Rendering
     open Plot.Core.Settings
 
+    let internal getMinorGridLinePoints maxValue numLines upperLeft lowerRight =
+        calcMinorGridLineIncrement maxValue numLines
+        |> calcMinorGridLinesPoints upperLeft lowerRight numLines
+
     let internal glueMinorGridLinesFunctions maxValue upperLeft lowerRight settings =
         match settings.XAxisGridLines with
         | None -> ignore
         | Some numLines ->
-            let increment = calcMinorGridLineIncrement maxValue numLines
-            let minorGridLinePoints = getMinorGridLinesPoints upperLeft lowerRight increment numLines
-            drawMinorGridLines minorGridLinePoints settings
+            getMinorGridLinePoints maxValue numLines upperLeft lowerRight
+            |> drawMinorGridLines settings
 
     let createLineChart settings (chartPoints:OriginalPoint<'T> array) =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
