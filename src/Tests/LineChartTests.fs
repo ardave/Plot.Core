@@ -34,16 +34,16 @@ let ``getMinMaxes from air passenger data``() =
     printfn "minMax: %A" minMax
 
 [<Fact>]
-let ``fitPointsToGrid should fit the points correctly``() =
+let ``scalePointsToGrid should fit the points correctly``() =
     let upperLeft  = { x = 150.;  y = 50.; originalX  = 150.  }
     let lowerRight = { x = 1350.; y = 450.; originalX = 1350. }
     let points = FakeData.hourlyDataDateTimes
-    let fittedPoints, _ = fitPointsToGrid upperLeft lowerRight points.[0] points
+    let scaledPoints, _ = scalePointsToGrid upperLeft lowerRight points.[0] points
     
-    let fartherLeftThanUpperLeft   p = p.fittedX < upperLeft.x
-    let fartherUpThanUpperLeft     p = p.fittedY < upperLeft.y
-    let fartherRightThanLowerRight p = p.fittedX > lowerRight.x
-    let fartherDownThanLowerRight  p = p.fittedY > lowerRight.y
+    let fartherLeftThanUpperLeft   p = p.scaledX < upperLeft.x
+    let fartherUpThanUpperLeft     p = p.scaledY < upperLeft.y
+    let fartherRightThanLowerRight p = p.scaledX > lowerRight.x
+    let fartherDownThanLowerRight  p = p.scaledY > lowerRight.y
 
     [
         fartherLeftThanUpperLeft
@@ -52,7 +52,7 @@ let ``fitPointsToGrid should fit the points correctly``() =
         fartherDownThanLowerRight
     ]
     |> List.iter (fun f ->
-        fittedPoints
+        scaledPoints
         |> Array.exists f
         |> should be False
     )

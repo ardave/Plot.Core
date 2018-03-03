@@ -9,11 +9,11 @@ namespace Plot.Core.LineChart
         open Plot.Core.Settings
         open LineChart.Calculation
 
-        let internal fittedToOriginal f = { x = f.fittedX; y = f.fittedY; originalX = f.fittedX }
+        let internal scaledToOriginal f = { x = f.scaledX; y = f.scaledY; originalX = f.scaledX }
         let originalToPointF o = PointF(float32 o.x, float32 o.y)
         let internal pointf x y = PointF(x, y)
         let internal addLine p1 p2 (pb:PathBuilder) = pb.AddLine(p1, p2) |> ignore
-        let internal addLineF (p1:FittedPoint) (p2:FittedPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
+        let internal addLineF (p1:ScaledPoint) (p2:ScaledPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
 
         let internal addLines points (pb:PathBuilder) =
             points
@@ -22,8 +22,8 @@ namespace Plot.Core.LineChart
             |> pb.AddLines
             |> ignore
 
-        let internal addLinesF (points:FittedPoint array) (pb:PathBuilder) =
-            let pointFs = points |> Array.map fittedToOriginal
+        let internal addLinesF (points:ScaledPoint array) (pb:PathBuilder) =
+            let pointFs = points |> Array.map scaledToOriginal
             addLines pointFs pb
 
         let private addAxes pb (img:Image<_>) =
@@ -82,13 +82,12 @@ namespace Plot.Core.LineChart
             let path = pb.Build()
             result, path
 
-        let internal drawDataLines settings upperLeft lowerRight firstPoint chartPoints =
+        let internal drawDataLines settings scaledPoints =
             let pb = PathBuilder()
-            let fittedPoints, minMaxes = fitPointsToGrid upperLeft lowerRight firstPoint chartPoints
-            pb |> addLinesF fittedPoints
+            pb |> addLinesF scaledPoints
             let path = pb.Build()
             let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, path) |> ignore
-            drawFunc, minMaxes
+            drawFunc
 
         let internal drawMajorGridLines settings img =
             let pbAxes = PathBuilder()
@@ -101,7 +100,6 @@ namespace Plot.Core.LineChart
             let pb = PathBuilder()
             minorGridLinesEndPoints
             |> List.map (fun (x, y) ->
-                printfn "x: %A, y: %A" x y
                 originalToPointF x, originalToPointF y)
             |> List.iter (fun (x, y) -> pb.AddLine(x, y) |> ignore)
             ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, pb.Build()) |> ignore

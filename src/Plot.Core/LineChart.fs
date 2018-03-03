@@ -40,7 +40,8 @@ module LineChart =
         match chartPoints |> Array.tryGet 0 with
         | None -> None
         | Some firstPoint ->
-            let drawDataLinesFunc, minMaxes = drawDataLines settings upperLeft lowerRight firstPoint chartPoints
+            let scaledPoints, minMaxes = scalePointsToGrid upperLeft lowerRight firstPoint chartPoints
+            let drawDataLinesFunc      = drawDataLines settings scaledPoints
             let drawMinorGridLinesFunc = glueMinorGridLinesFunctions minMaxes.maxX.value upperLeft lowerRight settings
 
             let allMutations = backgroundMutations @ [
@@ -49,7 +50,7 @@ module LineChart =
                                             drawMinX minMaxes upperLeft lowerRight settings.Font
                                             drawMinY minMaxes upperLeft lowerRight settings.Font
                                             drawMaxY minMaxes upperLeft settings.Font
-                                            drawMinorGridLinesFunc
+                                            // drawMinorGridLinesFunc
                                         ]
 
             img.Mutate(fun ctx ->
