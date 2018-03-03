@@ -16,15 +16,15 @@ module LineChart =
     open Plot.Core.LineChart.Rendering
     open Plot.Core.Settings
 
-    let internal getMinorGridLinePoints maxValue numLines upperLeft lowerRight =
-        calcMinorGridLineIncrement maxValue numLines
-        |> calcMinorGridLinesPoints upperLeft lowerRight numLines
+    let internal getMinorGridLinePoints scalingFactors numLines =
+        calcMinorGridLineIncrement scalingFactors numLines
+        |> calcMinorGridLinesPoints numLines scalingFactors
 
-    let internal glueMinorGridLinesFunctions maxValue upperLeft lowerRight settings scalingFactors =
-        match settings.XAxisGridLines with
+    let internal glueMinorGridLinesFunctions settings scalingFactors =
+        match settings.HorizontalGridLines with
         | None -> ignore
         | Some numLines ->
-            getMinorGridLinePoints maxValue numLines upperLeft lowerRight scalingFactors
+            getMinorGridLinePoints scalingFactors numLines
             |> drawMinorGridLines settings
 
     let createLineChart settings (chartPoints:OriginalPoint<'T> array) =
@@ -42,7 +42,7 @@ module LineChart =
         | Some firstPoint ->
             let scaledPoints, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint chartPoints
             let drawDataLinesFunc      = drawDataLines settings scaledPoints
-            let drawMinorGridLinesFunc = glueMinorGridLinesFunctions minMaxes.maxX.value upperLeft lowerRight settings scalingFactors
+            let drawMinorGridLinesFunc = glueMinorGridLinesFunctions settings scalingFactors
 
             let allMutations = backgroundMutations @ [
                                             drawDataLinesFunc
@@ -50,7 +50,7 @@ module LineChart =
                                             drawMinX minMaxes upperLeft lowerRight settings.Font
                                             drawMinY minMaxes upperLeft lowerRight settings.Font
                                             drawMaxY minMaxes upperLeft settings.Font
-                                            // drawMinorGridLinesFunc
+                                            drawMinorGridLinesFunc
                                         ]
 
             img.Mutate(fun ctx ->

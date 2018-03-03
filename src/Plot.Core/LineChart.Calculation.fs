@@ -58,11 +58,11 @@ namespace Plot.Core.LineChart
                 upperLeft   = upperLeft
             }
 
-        let inline internal scaleOneYCoordinate sf y =
+        let internal scaleOneYCoordinate sf y =
             let pctH = (sf.minMaxes.maxY - y) / sf.PointHeight
             pctH * sf.chartHeight + sf.upperLeft.y
 
-        let inline internal scalePointToGrid sf p =
+        let internal scalePointToGrid sf p =
             let pctW = (p.x - sf.minMaxes.minX.value) / sf.PointWidth
             let pctH = (sf.minMaxes.maxY - p.y) / sf.PointHeight
             let scaledPoint = 
@@ -78,25 +78,30 @@ namespace Plot.Core.LineChart
             let scaledPoints = points |> Array.map (scalePointToGrid scalingFactors)
             scaledPoints, minMaxes, scalingFactors
 
-        let internal calcMinorGridLineIncrement maxValue numGridLines =
-            let rec getIncrement input multiplier =
-                match input with
-                | i when i > 10. ->
-                    getIncrement (i / 10.) (multiplier * 10.)
-                | i when i <= 1. ->
-                    getIncrement (i * 10.) (multiplier / 10.)
-                | _ -> Math.Ceiling(float input) * multiplier
-            getIncrement (maxValue / float numGridLines) 1.
+        let internal calcMinorGridLineIncrement (scalingFactors:ScalingFactors<'T, 'U>) numGridLines =
+            // let rec getIncrement input multiplier =
+            //     printfn "Input = %f" input
+            //     match input with
+            //     | i when i > 1. ->
+            //         getIncrement (i / 10.) (multiplier * 10.)
+            //     | i when i <= 1. ->
+            //         getIncrement (i * 10.) (multiplier / 10.)
+            //     | _ -> Math.Ceiling input * multiplier
+            // printfn "PointHeight = %f, numGridLines = %i" scalingFactors.PointHeight numGridLines
+            // getIncrement (scalingFactors.PointHeight / float numGridLines) 1.
+            scalingFactors.PointHeight / float numGridLines
 
-        let internal calcMinorGridLinesPoints upperLeft lowerRight numLines increment sf =
+        let internal calcMinorGridLinesPoints numLines sf increment =
             [0.. numLines]
             |> List.map(fun n ->
-                let x1 = upperLeft.x
-                let y1 = lowerRight.y - increment * float n |> scaleOneYCoordinate sf
-                let x2 = lowerRight.x
-                let y2 = y1
-                let newStart = { x = x1; y = y1; originalX = x1 }
-                let newEnd   = { x = x2; y = y2; originalX = x2 }
+                // let y = (lowerRight.y - increment * float n)
+                let y = sf.minMaxes.minY + increment * float n
+                printfn "*********************************"
+                printfn "minY = %f, increment = %f, n = %i" sf.minMaxes.minY increment n
+                // printfn "y = %f" y
+                let newStart = { x = sf.minMaxes.minX.value; y = y; originalX = sf.minMaxes.minX.originalValue } |> scalePointToGrid sf
+                let newEnd   = { x = sf.minMaxes.maxX.value; y = y; originalX = sf.minMaxes.maxX.originalValue } |> scalePointToGrid sf
+                printfn "newStart = %A\nnewEnd = %A" newStart newEnd
                 newStart, newEnd
             )
         let internal calculateTitleLocation settings =

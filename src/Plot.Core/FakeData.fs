@@ -300,4 +300,5 @@ module FakeData =
         "1960-11",390
         "1960-12",432
         |] |> Array.map(fun (x, y) -> { x = float <| DateTime.Parse(x).Ticks; y = float y; originalX = x } )
+        // |] |> Array.map(fun (x, y) -> { x = float <| DateTime.Parse(x).Year * 100 + DateTime.Parse(x).Month ; y = float y; originalX = x } )
 

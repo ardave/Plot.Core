@@ -14,17 +14,17 @@ module Settings =
     }
 
     type LineChartSettings = {
-        Title          : string
-        Width          : int
-        Height         : int
-        GridColor      : Rgba32
-        DataColor      : Rgba32
-        Font           : SixLabors.Fonts.Font
-        RenderingStyle : RenderingStyle
-        GridLineStyle  : LineStyle
-        DataLineStyle  : LineStyle
-        XAxisGridLines : int option
-        YAxisGridLines : int option
+        Title               : string
+        Width               : int
+        Height              : int
+        GridColor           : Rgba32
+        DataColor           : Rgba32
+        Font                : SixLabors.Fonts.Font
+        RenderingStyle      : RenderingStyle
+        GridLineStyle       : LineStyle
+        DataLineStyle       : LineStyle
+        HorizontalGridLines : int option
+        VerticalGridLines   : int option
     }
 
     let internal calculateFontSize chartWidth =
@@ -34,15 +34,15 @@ module Settings =
 
     let createLineChartSettings chartTitle width height =
         {
-            Title          = chartTitle
-            Width          = width
-            Height         = height
-            GridColor      = Rgba32.Black
-            DataColor      = Rgba32.Black
-            Font           = SystemFonts.CreateFont("Arial", calculateFontSize width, FontStyle.Regular)
-            RenderingStyle = Lines
-            GridLineStyle  = { Color = Rgba32.Black;  Thickness = 3.f }
-            DataLineStyle  = { Color = Rgba32.Orange; Thickness = 2.f }
-            XAxisGridLines = Some 5
-            YAxisGridLines = Some 10
+            Title               = chartTitle
+            Width               = width
+            Height              = height
+            GridColor           = Rgba32.Black
+            DataColor           = Rgba32.Black
+            Font                = SystemFonts.CreateFont("Arial", calculateFontSize width, FontStyle.Regular)
+            RenderingStyle      = Lines
+            GridLineStyle       = { Color = Rgba32.Black;  Thickness = 3.f }
+            DataLineStyle       = { Color = Rgba32.Orange; Thickness = 2.f }
+            HorizontalGridLines = Some 5
+            VerticalGridLines   = Some 10
         }

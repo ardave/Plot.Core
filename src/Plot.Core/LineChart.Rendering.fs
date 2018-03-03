@@ -10,7 +10,8 @@ namespace Plot.Core.LineChart
         open LineChart.Calculation
 
         let internal scaledToOriginal f = { x = f.scaledX; y = f.scaledY; originalX = f.scaledX }
-        let originalToPointF o = PointF(float32 o.x, float32 o.y)
+        let internal scaledToPointF s = PointF(float32 s.scaledX, float32 s.scaledY)
+        let internal originalToPointF o = PointF(float32 o.x, float32 o.y)
         let internal pointf x y = PointF(x, y)
         let internal addLine p1 p2 (pb:PathBuilder) = pb.AddLine(p1, p2) |> ignore
         let internal addLineF (p1:ScaledPoint) (p2:ScaledPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
@@ -22,7 +23,7 @@ namespace Plot.Core.LineChart
             |> pb.AddLines
             |> ignore
 
-        let internal addLinesF (points:ScaledPoint array) (pb:PathBuilder) =
+        let internal addLinesF points (pb:PathBuilder) =
             let pointFs = points |> Array.map scaledToOriginal
             addLines pointFs pb
 
@@ -100,7 +101,7 @@ namespace Plot.Core.LineChart
             let pb = PathBuilder()
             minorGridLinesEndPoints
             |> List.map (fun (x, y) ->
-                originalToPointF x, originalToPointF y)
+                scaledToPointF x, scaledToPointF y)
             |> List.iter (fun (x, y) -> pb.AddLine(x, y) |> ignore)
             ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, pb.Build()) |> ignore
 
