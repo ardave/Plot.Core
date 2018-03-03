@@ -20,11 +20,11 @@ module LineChart =
         calcMinorGridLineIncrement maxValue numLines
         |> calcMinorGridLinesPoints upperLeft lowerRight numLines
 
-    let internal glueMinorGridLinesFunctions maxValue upperLeft lowerRight settings =
+    let internal glueMinorGridLinesFunctions maxValue upperLeft lowerRight settings scalingFactors =
         match settings.XAxisGridLines with
         | None -> ignore
         | Some numLines ->
-            getMinorGridLinePoints maxValue numLines upperLeft lowerRight
+            getMinorGridLinePoints maxValue numLines upperLeft lowerRight scalingFactors
             |> drawMinorGridLines settings
 
     let createLineChart settings (chartPoints:OriginalPoint<'T> array) =
@@ -40,9 +40,9 @@ module LineChart =
         match chartPoints |> Array.tryGet 0 with
         | None -> None
         | Some firstPoint ->
-            let scaledPoints, minMaxes = scalePointsToGrid upperLeft lowerRight firstPoint chartPoints
+            let scaledPoints, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint chartPoints
             let drawDataLinesFunc      = drawDataLines settings scaledPoints
-            let drawMinorGridLinesFunc = glueMinorGridLinesFunctions minMaxes.maxX.value upperLeft lowerRight settings
+            let drawMinorGridLinesFunc = glueMinorGridLinesFunctions minMaxes.maxX.value upperLeft lowerRight settings scalingFactors
 
             let allMutations = backgroundMutations @ [
                                             drawDataLinesFunc

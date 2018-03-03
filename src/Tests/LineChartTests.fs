@@ -29,16 +29,11 @@ let ``getMinMaxes should get the correct min maxes``() =
     minMaxes.maxY |> shouldEqual 8.
 
 [<Fact>]
-let ``getMinMaxes from air passenger data``() =
-    let minMax = FakeData.hourlyDataDateTimes |> getMinMaxes FakeData.hourlyDataDateTimes.[0]
-    printfn "minMax: %A" minMax
-
-[<Fact>]
 let ``scalePointsToGrid should fit the points correctly``() =
     let upperLeft  = { x = 150.;  y = 50.; originalX  = 150.  }
     let lowerRight = { x = 1350.; y = 450.; originalX = 1350. }
     let points = FakeData.hourlyDataDateTimes
-    let scaledPoints, _ = scalePointsToGrid upperLeft lowerRight points.[0] points
+    let scaledPoints, _, _ = scalePointsToGrid upperLeft lowerRight points.[0] points
     
     let fartherLeftThanUpperLeft   p = p.scaledX < upperLeft.x
     let fartherUpThanUpperLeft     p = p.scaledY < upperLeft.y
@@ -77,11 +72,11 @@ let ``get minor grid lines increment``() =
 let ``get minor grid lines increment from fake data``() =
     let max =
         FakeData.hourlyDataDateTimes
-        |> Array.map (fun x -> x.x)
+        |> Array.map (fun x -> x.y)
         |> Array.max
 
     let increment = calcMinorGridLineIncrement max 5
-    increment |> shouldEqual 17.
+    increment |> shouldEqual 200.
     ()
 
 [<Fact>]
@@ -90,9 +85,6 @@ let ``get Minor grid lines points``() =
     let lowerRight = { x = 900.; y = 900.; originalX = 900. }
     let numLines   = 5
     let increment  = 10.
-    let x = calcMinorGridLinesPoints upperLeft lowerRight numLines increment
-
-    let printATuple (st, nd) = printfn "From (%f, %f) to (%f, %f)" st.x st.y nd.x nd.y
-    x |> List.iter printATuple
-
-
+    calcMinorGridLinesPoints upperLeft lowerRight numLines increment
+    |> ignore
+    // TODO:  Add meaningful assertion
