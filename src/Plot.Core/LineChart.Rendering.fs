@@ -23,7 +23,7 @@ namespace Plot.Core.LineChart
             |> pb.AddLines
             |> ignore
 
-        let internal addLinesF points (pb:PathBuilder) =
+        let internal addLinesF points pb =
             let pointFs = points |> Array.map scaledToOriginal
             addLines pointFs pb
 
@@ -98,12 +98,14 @@ namespace Plot.Core.LineChart
             upperLeft, lowerRight, drawFunc
 
         let internal drawMinorGridLines settings minorGridLinesEndPoints (ctx:IImageProcessingContext<Rgba32>) =
-            let pb = PathBuilder()
+            
             minorGridLinesEndPoints
             |> List.map (fun (x, y) ->
                 scaledToPointF x, scaledToPointF y)
-            |> List.iter (fun (x, y) -> pb.AddLine(x, y) |> ignore)
-            ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, pb.Build()) |> ignore
+            |> List.iter (fun (x, y) ->
+                let pb = PathBuilder()
+                pb.AddLine(x, y) |> ignore
+                ctx.Draw(settings.MinorGridLineStyle.Color, settings.MinorGridLineStyle.Thickness, pb.Build()) |> ignore)
 
         let internal drawTitle settings (ctx:IImageProcessingContext<Rgba32>) =
             let pb = PathBuilder()
