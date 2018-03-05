@@ -55,26 +55,31 @@ namespace Plot.Core.LineChart
             chartHeight : float
             upperLeft   : OriginalPoint<'U>
             lowerRight  : OriginalPoint<'U>
-        } with
-            member x.PointWidth  = x.minMaxes.maxX.value - x.minMaxes.minX.value
-            member x.PointHeight = x.minMaxes.maxY - x.minMaxes.minY
+            pointWidth  : float
+            pointHeight : float
+        } 
+
+        let createScalingFactors minMaxes upperLeft lowerRight = 
+                {
+                    minMaxes = minMaxes
+                    chartWidth = lowerRight.x - upperLeft.x
+                    chartHeight = lowerRight.y - upperLeft.y
+                    upperLeft = upperLeft
+                    lowerRight = lowerRight
+                    pointWidth = minMaxes.maxX.value - minMaxes.minX.value
+                    pointHeight = minMaxes.maxY - minMaxes.minY
+                }
 
         let internal calculateScalingFactors upperLeft lowerRight minMaxes =
-            {
-                minMaxes    = minMaxes
-                chartWidth  = lowerRight.x - upperLeft.x
-                chartHeight = lowerRight.y - upperLeft.y
-                lowerRight  = lowerRight
-                upperLeft   = upperLeft
-            }
+            createScalingFactors minMaxes upperLeft lowerRight
 
         let internal scaleOneYCoordinate sf y =
-            let pctH = (sf.minMaxes.maxY - y) / sf.PointHeight
+            let pctH = (sf.minMaxes.maxY - y) / sf.pointHeight
             pctH * sf.chartHeight + sf.upperLeft.y
 
         let internal scalePointToGrid sf p =
-            let pctW = (p.x - sf.minMaxes.minX.value) / sf.PointWidth
-            let pctH = (sf.minMaxes.maxY - p.y) / sf.PointHeight
+            let pctW = (p.x - sf.minMaxes.minX.value) / sf.pointWidth
+            let pctH = (sf.minMaxes.maxY - p.y) / sf.pointHeight
             let scaledPoint = 
                 {
                     scaledX = pctW * sf.chartWidth + sf.upperLeft.x

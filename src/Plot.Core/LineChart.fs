@@ -16,13 +16,13 @@ module LineChart =
     open Plot.Core.LineChart.Rendering
     open Plot.Core.Settings
 
-    let internal getMinorGridLinePoints (scalingFactors:ScalingFactors<'T, 'U>) numLines =
+    let internal getMinorGridLinePoints scalingFactors numLines =
         let horizontalLines =
-            calcMinorGridLineIncrement scalingFactors.PointHeight numLines
+            calcMinorGridLineIncrement scalingFactors.pointHeight numLines
             |> calcMinorHorizontalGridLinesPoints numLines scalingFactors
 
         let verticalLines =
-            calcMinorGridLineIncrement scalingFactors.PointWidth numLines
+            calcMinorGridLineIncrement scalingFactors.pointWidth numLines
             |> calcMinorVerticalGridLinesPoints numLines scalingFactors
 
         horizontalLines @ verticalLines
