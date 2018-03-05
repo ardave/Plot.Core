@@ -10,12 +10,22 @@ namespace Plot.Core.LineChart
             originalValue : 'T
         }
         
+        let minMaxCreate v = { value = v; originalValue = v }
+        
         type internal MinMaxes<'T> = {
             minX : MinMax<'T>
             maxX : MinMax<'T>
             minY : float
             maxY : float
-        }
+        } 
+
+        let minMaxesCreate minX maxX minY maxY = 
+            {
+                minX = minMaxCreate minX
+                maxX = minMaxCreate maxX
+                minY = minY
+                maxY = maxY
+            }
 
         let private pointToMinMax point = { originalValue = point.originalX; value = point.x }
 
