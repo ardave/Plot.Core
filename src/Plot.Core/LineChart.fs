@@ -16,11 +16,18 @@ module LineChart =
     open Plot.Core.LineChart.Rendering
     open Plot.Core.Settings
 
-    let internal getMinorGridLinePoints scalingFactors numLines =
-        calcMinorGridLineIncrement scalingFactors numLines
-        |> calcMinorGridLinesPoints numLines scalingFactors
+    let internal getMinorGridLinePoints (scalingFactors:ScalingFactors<'T, 'U>) numLines =
+        let horizontalLines =
+            calcMinorGridLineIncrement scalingFactors.PointHeight numLines
+            |> calcMinorHorizontalGridLinesPoints numLines scalingFactors
 
-    let internal glueMinorGridLinesFunctions settings scalingFactors =
+        let verticalLines =
+            calcMinorGridLineIncrement scalingFactors.PointWidth numLines
+            |> calcMinorVerticalGridLinesPoints numLines scalingFactors
+
+        horizontalLines @ verticalLines
+
+    let internal assembleMinorGridLinesFunctions settings scalingFactors =
         match settings.HorizontalGridLines with
         | None -> ignore
         | Some numLines ->
@@ -42,7 +49,7 @@ module LineChart =
         | Some firstPoint ->
             let scaledPoints, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint chartPoints
             let drawDataLinesFunc      = drawDataLines settings scaledPoints
-            let drawMinorGridLinesFunc = glueMinorGridLinesFunctions settings scalingFactors
+            let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
 
             let allMutations = backgroundMutations @ [
                                             drawDataLinesFunc

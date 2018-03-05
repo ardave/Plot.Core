@@ -88,7 +88,7 @@ namespace Plot.Core.LineChart
             let scaledPoints = points |> Array.map (scalePointToGrid scalingFactors)
             scaledPoints, minMaxes, scalingFactors
 
-        let internal calcMinorGridLineIncrement (scalingFactors:ScalingFactors<'T, 'U>) numGridLines =
+        let internal calcMinorGridLineIncrement span numGridLines =
             // let rec getIncrement input multiplier =
             //     printfn "Input = %f" input
             //     match input with
@@ -99,21 +99,26 @@ namespace Plot.Core.LineChart
             //     | _ -> Math.Ceiling input * multiplier
             // printfn "PointHeight = %f, numGridLines = %i" scalingFactors.PointHeight numGridLines
             // getIncrement (scalingFactors.PointHeight / float numGridLines) 1.
-            scalingFactors.PointHeight / float numGridLines
+            span / float numGridLines
 
-        let internal calcMinorGridLinesPoints numLines sf increment =
+        let internal calcMinorHorizontalGridLinesPoints numLines sf increment =
             [0.. numLines]
             |> List.map(fun n ->
-                // let y = (lowerRight.y - increment * float n)
                 let y = sf.minMaxes.minY + increment * float n
-                printfn "*********************************"
-                printfn "minY = %f, increment = %f, n = %i" sf.minMaxes.minY increment n
-                // printfn "y = %f" y
                 let newStart = { x = sf.minMaxes.minX.value; y = y; originalX = sf.minMaxes.minX.originalValue } |> scalePointToGrid sf
                 let newEnd   = { x = sf.minMaxes.maxX.value; y = y; originalX = sf.minMaxes.maxX.originalValue } |> scalePointToGrid sf
-                printfn "newStart = %A\nnewEnd = %A" newStart newEnd
                 newStart, newEnd
             )
+
+        let internal calcMinorVerticalGridLinesPoints numLines sf increment =
+            [0.. numLines]
+            |> List.map(fun n ->
+                let x = sf.minMaxes.minX.value + increment * float n
+                let newStart = { x = x; y = sf.minMaxes.minY; originalX = x } |> scalePointToGrid sf
+                let newEnd   = { x = x; y = sf.minMaxes.maxY; originalX = x } |> scalePointToGrid sf
+                newStart, newEnd
+            )
+
         let internal calculateTitleLocation settings =
             let starting = float32 settings.Width / 2.f
             let y = float32 settings.Height * 0.1f
