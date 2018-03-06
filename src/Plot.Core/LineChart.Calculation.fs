@@ -116,7 +116,6 @@ namespace Plot.Core.LineChart
                 | x when x > 2. -> 5.  * magnitude
                 | x when x > 1. -> 2.  * magnitude
                 | _ -> magnitude
-            printfn "Result = %f" result
             result
 
         let internal calcMinorHorizontalGridLinesPoints numLines sf increment =
@@ -125,7 +124,6 @@ namespace Plot.Core.LineChart
                 let y = sf.minMaxes.minY + increment * float n
                 let newStart = { x = sf.minMaxes.minX.value; y = y; originalX = sf.minMaxes.minX.originalValue } |> scalePointToGrid sf
                 let newEnd   = { x = sf.minMaxes.maxX.value; y = y; originalX = sf.minMaxes.maxX.originalValue } |> scalePointToGrid sf
-                printfn "Grid line point from %A to %A" newStart newEnd
                 newStart, newEnd
             )
 
@@ -140,7 +138,7 @@ namespace Plot.Core.LineChart
 
         let internal calculateTitleLocation settings =
             let starting = float32 settings.Width / 2.f
-            let y = float32 settings.Height * 0.1f
+            let y = (float32 settings.Height * 0.1f) - (settings.Font.Size * 0.5f)
             let titleWidth = float32 settings.Title.Length * settings.Font.Size
             let pStart = PointF(starting - titleWidth * 0.25f, y)
             let pEnd   = PointF(starting + titleWidth * 0.75f, y)

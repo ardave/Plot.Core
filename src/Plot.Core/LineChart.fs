@@ -5,24 +5,19 @@ module LineChart =
     open System
 
     open SixLabors.ImageSharp
-    open SixLabors.Shapes
-    open SixLabors.Primitives
-    open SixLabors.Fonts
-    open SixLabors.ImageSharp.Drawing
-
+    
     open Calculation
     open Rendering
     open Plot.Core
-    open Plot.Core.LineChart.Rendering
     open Plot.Core.Settings
 
     let internal getMinorGridLinePoints scalingFactors numLines =
         let horizontalLines =
-            soStrategy scalingFactors.pointHeight numLines
+            calcMinorGridLineIncrement scalingFactors.pointHeight numLines
             |> calcMinorHorizontalGridLinesPoints numLines scalingFactors
 
         let verticalLines =
-            soStrategy scalingFactors.pointWidth numLines
+            calcMinorGridLineIncrement scalingFactors.pointWidth numLines
             |> calcMinorVerticalGridLinesPoints numLines scalingFactors
 
         horizontalLines @ verticalLines
