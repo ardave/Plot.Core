@@ -106,12 +106,26 @@ namespace Plot.Core.LineChart
             // getIncrement (scalingFactors.PointHeight / float numGridLines) 1.
             span / float numGridLines
 
+        let internal soStrategy span numGridLines =
+            let minimum = span / float numGridLines
+            let magnitude = 10. ** Math.Floor(Math.Log(minimum) / Math.Log(10.))
+            let residual = minimum / magnitude
+            let result = 
+                match residual with
+                | x when x > 5. -> 10. * magnitude
+                | x when x > 2. -> 5.  * magnitude
+                | x when x > 1. -> 2.  * magnitude
+                | _ -> magnitude
+            printfn "Result = %f" result
+            result
+
         let internal calcMinorHorizontalGridLinesPoints numLines sf increment =
             [0.. numLines]
             |> List.map(fun n ->
                 let y = sf.minMaxes.minY + increment * float n
                 let newStart = { x = sf.minMaxes.minX.value; y = y; originalX = sf.minMaxes.minX.originalValue } |> scalePointToGrid sf
                 let newEnd   = { x = sf.minMaxes.maxX.value; y = y; originalX = sf.minMaxes.maxX.originalValue } |> scalePointToGrid sf
+                printfn "Grid line point from %A to %A" newStart newEnd
                 newStart, newEnd
             )
 

@@ -18,11 +18,11 @@ module LineChart =
 
     let internal getMinorGridLinePoints scalingFactors numLines =
         let horizontalLines =
-            calcMinorGridLineIncrement scalingFactors.pointHeight numLines
+            soStrategy scalingFactors.pointHeight numLines
             |> calcMinorHorizontalGridLinesPoints numLines scalingFactors
 
         let verticalLines =
-            calcMinorGridLineIncrement scalingFactors.pointWidth numLines
+            soStrategy scalingFactors.pointWidth numLines
             |> calcMinorVerticalGridLinesPoints numLines scalingFactors
 
         horizontalLines @ verticalLines
