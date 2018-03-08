@@ -1,19 +1,19 @@
 namespace Tests
 
-open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open SixLabors.ImageSharp
 open Plot.Core
-open Plot.Core.LineChart
-open Plot.Core.Settings
+open Plot.Core.LineChart.Calculation
+open Plot.Core.LineChart.LineChart
+open Plot.Core.LineChart.Rendering
 open Helpers
 
 [<TestClass>]
-type LineChartTests () =
+type LineChartTests() =
     [<TestMethod>]
     member this.``Generate actual image from air passenger data`` () =
         let points   = Plot.Core.FakeData.hourlyDataDateTimes
-        let settings = createLineChartSettings "Air Passenger Data" 1500 500
+        let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
         let imageOpt = points |> createLineChart settings
 
         match imageOpt with
@@ -24,29 +24,31 @@ type LineChartTests () =
     member this.``getMinMaxes should get the correct min maxes``() =
         let chartPoints =
             [|
-                { originalX = 1.f; x = 1.f; y = 2.f  }
-                { originalX = 4.f; x = 4.f; y = 5.f  }
-                { originalX = 7.f; x = 7.f; y = 8.f  }
+                { originalX = 1.f; x = 1.; y = 2. }
+                { originalX = 4.f; x = 4.; y = 5. }
+                { originalX = 7.f; x = 7.; y = 8. }
             |]
 
+        
         let minMaxes = chartPoints |> getMinMaxes chartPoints.[0]
 
         minMaxes.minX.originalValue |> shouldEqual 1.f
+        minMaxes.minX.originalValue |> shouldEqual 1.f
         minMaxes.maxX.originalValue |> shouldEqual 7.f
-        minMaxes.minY |> shouldEqual 2.f
-        minMaxes.maxY |> shouldEqual 8.f
+        minMaxes.minY |> shouldEqual 2.
+        minMaxes.maxY |> shouldEqual 8.
 
     [<TestMethod>]
-    member this.``fitPointsToGrid should fit the points correctly``() =
-        let upperLeft = pointf 150.f 50.f
-        let lowerRight = pointf 1350.f 450.f
+    member this.``scalePointsToGrid should fit the points correctly``() =
+        let upperLeft  = { x = 150.;  y = 50.; originalX  = 150.  }
+        let lowerRight = { x = 1350.; y = 450.; originalX = 1350. }
         let points = FakeData.hourlyDataDateTimes
-        let fittedPoints, _ = fitPointsToGrid upperLeft lowerRight points.[0] points
+        let scaledPoints, _, _ = scalePointsToGrid upperLeft lowerRight points.[0] points
         
-        let fartherLeftThanUpperLeft   p = p.fittedX < upperLeft.X
-        let fartherUpThanUpperLeft     p = p.fittedY < upperLeft.Y
-        let fartherRightThanLowerRight p = p.fittedX > lowerRight.X
-        let fartherDownThanLowerRight  p = p.fittedY > lowerRight.Y
+        let fartherLeftThanUpperLeft   p = p.scaledX < upperLeft.x
+        let fartherUpThanUpperLeft     p = p.scaledY < upperLeft.y
+        let fartherRightThanLowerRight p = p.scaledX > lowerRight.x
+        let fartherDownThanLowerRight  p = p.scaledY > lowerRight.y
 
         [
             fartherLeftThanUpperLeft
@@ -55,7 +57,7 @@ type LineChartTests () =
             fartherDownThanLowerRight
         ]
         |> List.iter (fun f ->
-            fittedPoints
+            scaledPoints
             |> Array.exists f
             |> shouldEqual false
         )
