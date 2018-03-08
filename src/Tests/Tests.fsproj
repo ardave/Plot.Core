@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="FakeData.fs" />
     <Compile Include="LineChartTests.fs" />
     <Compile Include="ArrayExtensionsTests.fs" />
   </ItemGroup>

@@ -1,9 +1,20 @@
 module LineChartTests
+open SixLabors.ImageSharp
 open Xunit
 open FsUnit.Xunit
 open Plot.Core
 open Plot.Core.LineChart
-open SixLabors.Primitives
+open Plot.Core.Settings
+
+[<Fact>]
+let ``Generate actual image from air passenger data``() =
+    let points   = Plot.Core.FakeData.hourlyDataDateTimes
+    let settings = createLineChartSettings "Air Passenger Data" 1500 500
+    let imageOpt = points |> createLineChart settings
+
+    match imageOpt with
+    | Some img -> img.Save "AirPassengerData.png"
+    | None -> failwith "Maybe you didn't include any points for your chart"
 
 [<Fact>]
 let ``getMinMaxes should get the correct min maxes``() =
