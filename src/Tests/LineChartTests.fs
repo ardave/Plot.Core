@@ -1,6 +1,7 @@
 namespace Tests
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open SixLabors.ImageSharp
 open Plot.Core
 open Plot.Core.LineChart.Calculation
 open Plot.Core.LineChart.LineChart
@@ -9,6 +10,16 @@ open Helpers
 
 [<TestClass>]
 type LineChartTests() =
+    [<TestMethod>]
+    member this.``Generate actual image from air passenger data`` () =
+        let points   = Plot.Core.FakeData.hourlyDataDateTimes
+        let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
+        let imageOpt = points |> createLineChart settings
+
+        match imageOpt with
+        | Some img -> img.Save "AirPassengerData.png"
+        | None -> failwith "Maybe you didn't include any points for your chart"
+
     [<TestMethod>]
     member this.``getMinMaxes should get the correct min maxes``() =
         let chartPoints =
