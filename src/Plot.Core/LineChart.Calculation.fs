@@ -122,18 +122,28 @@ namespace Plot.Core.LineChart
             [0.. numLines]
             |> List.map(fun n ->
                 let y = sf.minMaxes.minY + increment * float n
-                let newStart = { x = sf.minMaxes.minX.value; y = y; originalX = sf.minMaxes.minX.originalValue } |> scalePointToGrid sf
-                let newEnd   = { x = sf.minMaxes.maxX.value; y = y; originalX = sf.minMaxes.maxX.originalValue } |> scalePointToGrid sf
-                newStart, newEnd
+                let start = { x = sf.minMaxes.minX.value; y = y; originalX = sf.minMaxes.minX.originalValue } |> scalePointToGrid sf
+                let endd   = { x = sf.minMaxes.maxX.value; y = y; originalX = sf.minMaxes.maxX.originalValue } |> scalePointToGrid sf
+                { 
+                    direction = Horizontal
+                    label     = (y.ToString())
+                    start     = start
+                    endd      = endd
+                }
             )
 
         let internal calcMinorVerticalGridLinesPoints numLines sf increment =
             [0.. numLines]
             |> List.map(fun n ->
                 let x = sf.minMaxes.minX.value + increment * float n
-                let newStart = { x = x; y = sf.minMaxes.minY; originalX = x } |> scalePointToGrid sf
-                let newEnd   = { x = x; y = sf.minMaxes.maxY; originalX = x } |> scalePointToGrid sf
-                newStart, newEnd
+                let start = { x = x; y = sf.minMaxes.minY; originalX = x } |> scalePointToGrid sf
+                let endd   = { x = x; y = sf.minMaxes.maxY; originalX = x } |> scalePointToGrid sf
+                { 
+                    direction = Horizontal
+                    label     = (x.ToString())
+                    start     = start
+                    endd      = endd
+                }
             )
 
         let internal calculateTitleLocation settings =
