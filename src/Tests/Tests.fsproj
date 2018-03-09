@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="FakeData.fs" />
+    <Compile Include="AirPassengerData.fs" />
     <Compile Include="Helpers.fs" />
     <Compile Include="ArrayExtensionsTests.fs" />
     <Compile Include="LineChartTests.fs" />
