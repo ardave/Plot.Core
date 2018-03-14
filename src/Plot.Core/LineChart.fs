@@ -29,7 +29,7 @@ module LineChart =
             getMinorGridLinePoints scalingFactors numLines
             |> drawMinorGridLines settings
 
-    let createLineChart settings (chartPoints:OriginalPoint<'T> array) =
+    let createLineChart settings (series:TimeSeries<'T>) =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
         let upperLeft, lowerRight, drawMajorGridLinesFunc = drawMajorGridLines settings img
 
@@ -39,11 +39,11 @@ module LineChart =
             drawTitle settings
         ]
 
-        match chartPoints |> Array.tryGet 0 with
+        match series.originalPoints |> Array.tryGet 0 with
         | None -> None
         | Some firstPoint ->
-            let scaledPoints, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint chartPoints
-            let drawDataLinesFunc      = drawDataLines settings scaledPoints
+            let scaledSeries, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint series
+            let drawDataLinesFunc      = drawDataLines settings scaledSeries
             let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
 
             let allMutations = backgroundMutations @ [

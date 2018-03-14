@@ -83,9 +83,9 @@ namespace Plot.Core.LineChart
             let path = pb.Build()
             result, path
 
-        let internal drawDataLines settings scaledPoints =
+        let internal drawDataLines settings scaledSeries =
             let pb = PathBuilder()
-            pb |> addLinesF scaledPoints
+            pb |> addLinesF scaledSeries.scaledPoints
             let path = pb.Build()
             let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.DataLineStyle.Color, settings.DataLineStyle.Thickness, path) |> ignore
             drawFunc

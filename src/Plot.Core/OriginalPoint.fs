@@ -1,9 +1,8 @@
 namespace Plot.Core
-    open System.IO
-    open SixLabors.Fonts
     [<AutoOpen>]
     module OriginalPoint =
         open SixLabors.Primitives
+        open SixLabors.ImageSharp
 
         type public OriginalPoint<'T> = {
             // Original value for UI/Rendering/Display purposes
@@ -30,4 +29,16 @@ namespace Plot.Core
             endd      : ScaledPoint
             direction : Direction
             label     : string
+        }
+
+        type TimeSeries<'T> = {
+            originalPoints : OriginalPoint<'T> array
+            title          : string
+            color          : Rgba32
+        }
+
+        type internal ScaledTimeSeries<'T> = {
+            scaledPoints : ScaledPoint array
+            title          : string
+            color          : Rgba32
         }

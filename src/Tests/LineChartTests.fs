@@ -5,23 +5,27 @@ open SixLabors.ImageSharp
 open Plot.Core
 open Plot.Core.LineChart.Calculation
 open Plot.Core.LineChart.LineChart
-open Plot.Core.LineChart.Rendering
 open Helpers
 
 [<TestClass>]
 type LineChartTests() =
     [<TestMethod>]
-    member this.``Generate actual image from air passenger data`` () =
-        let points   = Plot.Core.FakeData.hourlyDataDateTimes
+    member __.``Generate actual image from air passenger data`` () =
+        let series =
+            {
+                originalPoints = Plot.Core.FakeData.hourlyDataDateTimes
+                title          = "Air Passenger Data"
+                color          = Rgba32.Orange
+            }    
         let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
-        let imageOpt = points |> createLineChart settings
+        let imageOpt = series |> createLineChart settings
 
         match imageOpt with
         | Some img -> img.Save "AirPassengerData.png"
         | None -> failwith "Maybe you didn't include any points for your chart"
 
     [<TestMethod>]
-    member this.``getMinMaxes should get the correct min maxes``() =
+    member __.``getMinMaxes should get the correct min maxes``() =
         let chartPoints =
             [|
                 { originalX = 1.f; x = 1.; y = 2. }
@@ -39,11 +43,11 @@ type LineChartTests() =
         minMaxes.maxY |> shouldEqual 8.
 
     [<TestMethod>]
-    member this.``scalePointsToGrid should fit the points correctly``() =
+    member __.``scalePointsToGrid should fit the points correctly``() =
         let upperLeft  = { x = 150.;  y = 50.; originalX  = 150.  }
         let lowerRight = { x = 1350.; y = 450.; originalX = 1350. }
-        let points = FakeData.hourlyDataDateTimes
-        let scaledPoints, _, _ = scalePointsToGrid upperLeft lowerRight points.[0] points
+        let series = { originalPoints = FakeData.hourlyDataDateTimes; title = "whatever"; color = Rgba32.White }
+        let scaledSeries, _, _ = scalePointsToGrid upperLeft lowerRight series.originalPoints.[0] series
         
         let fartherLeftThanUpperLeft   p = p.scaledX < upperLeft.x
         let fartherUpThanUpperLeft     p = p.scaledY < upperLeft.y
@@ -57,7 +61,7 @@ type LineChartTests() =
             fartherDownThanLowerRight
         ]
         |> List.iter (fun f ->
-            scaledPoints
+            scaledSeries.scaledPoints
             |> Array.exists f
             |> shouldEqual false
         )

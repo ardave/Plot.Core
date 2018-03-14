@@ -17,8 +17,6 @@ module Settings =
         Title               : string
         Width               : int
         Height              : int
-        GridColor           : Rgba32
-        DataColor           : Rgba32
         Font                : SixLabors.Fonts.Font
         RenderingStyle      : RenderingStyle
         GridLineStyle       : LineStyle
@@ -38,8 +36,6 @@ module Settings =
             Title               = chartTitle
             Width               = width
             Height              = height
-            GridColor           = Rgba32.Black
-            DataColor           = Rgba32.Black
             Font                = SystemFonts.CreateFont("Arial", calculateFontSize width, FontStyle.Regular)
             RenderingStyle      = Lines
             GridLineStyle       = { Color = Rgba32.Black;     Thickness = 3.f }

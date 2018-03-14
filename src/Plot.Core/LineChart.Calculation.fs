@@ -87,11 +87,16 @@ namespace Plot.Core.LineChart
                 }
             scaledPoint
 
-        let internal scalePointsToGrid upperLeft lowerRight firstPoint points =
-            let minMaxes = getMinMaxes firstPoint points
+        let internal scalePointsToGrid upperLeft lowerRight firstPoint series =
+            let minMaxes = getMinMaxes firstPoint series.originalPoints
             let scalingFactors = calculateScalingFactors upperLeft lowerRight minMaxes
-            let scaledPoints = points |> Array.map (scalePointToGrid scalingFactors)
-            scaledPoints, minMaxes, scalingFactors
+            let scaledSeries = {
+                scaledPoints = series.originalPoints |> Array.map (scalePointToGrid scalingFactors)
+                title = series.title
+                color = series.color
+            }
+
+            scaledSeries, minMaxes, scalingFactors
 
         let internal calcMinorGridLineIncrement span numGridLines =
             // let rec getIncrement input multiplier =
