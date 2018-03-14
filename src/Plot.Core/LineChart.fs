@@ -43,7 +43,7 @@ module LineChart =
         | None -> None
         | Some firstPoint ->
             let scaledSeries, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint series
-            let drawDataLinesFunc      = drawDataLines settings scaledSeries
+            let drawDataLinesFunc      = drawDataLines scaledSeries
             let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
 
             let allMutations = backgroundMutations @ [

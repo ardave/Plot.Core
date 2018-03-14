@@ -1,4 +1,5 @@
 namespace Plot.Core
+    open Settings
     [<AutoOpen>]
     module OriginalPoint =
         open SixLabors.Primitives
@@ -33,12 +34,12 @@ namespace Plot.Core
 
         type TimeSeries<'T> = {
             originalPoints : OriginalPoint<'T> array
+            lineStyle      : LineStyle
             title          : string
-            color          : Rgba32
         }
 
         type internal ScaledTimeSeries<'T> = {
             scaledPoints : ScaledPoint array
+            lineStyle    : LineStyle
             title          : string
-            color          : Rgba32
         }

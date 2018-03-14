@@ -92,8 +92,8 @@ namespace Plot.Core.LineChart
             let scalingFactors = calculateScalingFactors upperLeft lowerRight minMaxes
             let scaledSeries = {
                 scaledPoints = series.originalPoints |> Array.map (scalePointToGrid scalingFactors)
-                title = series.title
-                color = series.color
+                lineStyle    = series.lineStyle
+                title        = series.title
             }
 
             scaledSeries, minMaxes, scalingFactors

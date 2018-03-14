@@ -14,8 +14,12 @@ type LineChartTests() =
         let series =
             {
                 originalPoints = Plot.Core.FakeData.hourlyDataDateTimes
-                title          = "Air Passenger Data"
-                color          = Rgba32.Orange
+                title = "Air Passenger Data"
+                lineStyle = 
+                    {
+                        Color = Rgba32.Orange
+                        Thickness = 2.f
+                    }
             }    
         let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
         let imageOpt = series |> createLineChart settings
@@ -46,7 +50,7 @@ type LineChartTests() =
     member __.``scalePointsToGrid should fit the points correctly``() =
         let upperLeft  = { x = 150.;  y = 50.; originalX  = 150.  }
         let lowerRight = { x = 1350.; y = 450.; originalX = 1350. }
-        let series = { originalPoints = FakeData.hourlyDataDateTimes; title = "whatever"; color = Rgba32.White }
+        let series = { originalPoints = FakeData.hourlyDataDateTimes; title = "whatever"; lineStyle = { Color = Rgba32.White; Thickness = 2.f }}
         let scaledSeries, _, _ = scalePointsToGrid upperLeft lowerRight series.originalPoints.[0] series
         
         let fartherLeftThanUpperLeft   p = p.scaledX < upperLeft.x
