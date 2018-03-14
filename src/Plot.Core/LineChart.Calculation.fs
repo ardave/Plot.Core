@@ -29,7 +29,7 @@ namespace Plot.Core.LineChart
 
         let private pointToMinMax point = { originalValue = point.originalX; value = point.x }
 
-        let internal getMinMaxes (firstPoint:OriginalPoint<'T>) points =
+        let internal getMinMaxes firstPoint seriesList =
             let initialState =
                 {
                     minX = { value = firstPoint.x; originalValue = firstPoint.originalX }
@@ -38,7 +38,10 @@ namespace Plot.Core.LineChart
                     maxY = firstPoint.y
                 }
 
-            points
+            seriesList
+            |> List.map(fun x -> x.originalPoints)
+            |> List.toArray
+            |> Array.collect id
             |> Array.fold (fun minMaxes point ->
                 let minMax = {
                     minX = if point.x < minMaxes.minX.value then pointToMinMax point else minMaxes.minX
@@ -87,8 +90,9 @@ namespace Plot.Core.LineChart
                 }
             scaledPoint
 
-        let internal scalePointsToGrid upperLeft lowerRight firstPoint series =
-            let minMaxes = getMinMaxes firstPoint series.originalPoints
+        let internal scalePointsToGrid upperLeft lowerRight firstPoint seriesList =
+            let minMaxes = getMinMaxes firstPoint seriesList
+            let series = seriesList |> List.head
             let scalingFactors = calculateScalingFactors upperLeft lowerRight minMaxes
             let scaledSeries = {
                 scaledPoints = series.originalPoints |> Array.map (scalePointToGrid scalingFactors)

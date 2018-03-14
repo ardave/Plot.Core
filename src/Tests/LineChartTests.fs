@@ -22,11 +22,8 @@ type LineChartTests() =
                     }
             }    
         let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
-        let imageOpt = series |> createLineChart settings
-
-        match imageOpt with
-        | Some img -> img.Save "AirPassengerData.png"
-        | None -> failwith "Maybe you didn't include any points for your chart"
+        let image = [series] |> createLineChart settings
+        image.Save "AirPassengerData.png"
 
     [<TestMethod>]
     member __.``getMinMaxes should get the correct min maxes``() =
@@ -37,8 +34,19 @@ type LineChartTests() =
                 { originalX = 7.f; x = 7.; y = 8. }
             |]
 
+        let series = 
+            {
+                originalPoints = chartPoints
+                lineStyle = 
+                    {
+                        Color = Rgba32.White
+                        Thickness = 1.f
+                    }
+                title = ""
+            }
+
         
-        let minMaxes = chartPoints |> getMinMaxes chartPoints.[0]
+        let minMaxes = [series] |> getMinMaxes chartPoints.[0]
 
         minMaxes.minX.originalValue |> shouldEqual 1.f
         minMaxes.minX.originalValue |> shouldEqual 1.f
@@ -51,7 +59,7 @@ type LineChartTests() =
         let upperLeft  = { x = 150.;  y = 50.; originalX  = 150.  }
         let lowerRight = { x = 1350.; y = 450.; originalX = 1350. }
         let series = { originalPoints = FakeData.hourlyDataDateTimes; title = "whatever"; lineStyle = { Color = Rgba32.White; Thickness = 2.f }}
-        let scaledSeries, _, _ = scalePointsToGrid upperLeft lowerRight series.originalPoints.[0] series
+        let scaledSeries, _, _ = scalePointsToGrid upperLeft lowerRight series.originalPoints.[0] [series]
         
         let fartherLeftThanUpperLeft   p = p.scaledX < upperLeft.x
         let fartherUpThanUpperLeft     p = p.scaledY < upperLeft.y
