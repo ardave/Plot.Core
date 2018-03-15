@@ -20,9 +20,16 @@ type LineChartTests() =
                         Color = Rgba32.Orange
                         Thickness = 2.f
                     }
-            }    
+            }
+        let anotherSeries = 
+            {
+                series with 
+                    originalPoints = series.originalPoints |> Array.map(fun op -> { op with x = op.x + 10. })
+                    title = "Air Passenger Data 2"
+            }
+
         let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
-        let image = [series] |> createLineChart settings
+        let image = [series; anotherSeries] |> createLineChart settings
         image.Save "AirPassengerData.png"
 
     [<TestMethod>]

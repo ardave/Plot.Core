@@ -45,9 +45,8 @@ module LineChart =
             | None -> ()
             | Some firstPoint ->
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint seriesList
-                // let drawDataLinesFunc      = drawDataLines scaledSeries
-                
-                let drawSeriesFuncs = scaledSeriesList |> List.map(fun s -> drawDataLines s)
+
+                let drawSeriesFuncs = scaledSeriesList |> List.map drawDataLines
 
                 let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
 
@@ -58,7 +57,7 @@ module LineChart =
                                                 drawMaxY minMaxes upperLeft settings.Font
                                                 drawMinorGridLinesFunc
                 ] 
-
+                printfn "Running %s...." series.title
                 img.Mutate(fun ctx ->
                     allMutations |> List.iter(fun m -> m ctx)
             )
