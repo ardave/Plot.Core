@@ -44,18 +44,20 @@ module LineChart =
             match series.originalPoints |> Array.tryGet 0 with
             | None -> ()
             | Some firstPoint ->
-                let scaledSeries, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint seriesList
-                let drawDataLinesFunc      = drawDataLines scaledSeries
+                let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint seriesList
+                // let drawDataLinesFunc      = drawDataLines scaledSeries
+                
+                let drawSeriesFuncs = scaledSeriesList |> List.map(fun s -> drawDataLines s)
+
                 let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
 
-                let allMutations = backgroundMutations @ [
-                                                drawDataLinesFunc
+                let allMutations = backgroundMutations @ drawSeriesFuncs @[
                                                 drawMaxX minMaxes lowerRight settings.Font
                                                 drawMinX minMaxes upperLeft lowerRight settings.Font
                                                 drawMinY minMaxes upperLeft lowerRight settings.Font
                                                 drawMaxY minMaxes upperLeft settings.Font
                                                 drawMinorGridLinesFunc
-                                            ]
+                ] 
 
                 img.Mutate(fun ctx ->
                     allMutations |> List.iter(fun m -> m ctx)

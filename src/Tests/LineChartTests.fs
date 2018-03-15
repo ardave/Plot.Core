@@ -73,7 +73,7 @@ type LineChartTests() =
             fartherDownThanLowerRight
         ]
         |> List.iter (fun f ->
-            scaledSeries.scaledPoints
+            (scaledSeries |> List.head).scaledPoints
             |> Array.exists f
             |> shouldEqual false
         )
