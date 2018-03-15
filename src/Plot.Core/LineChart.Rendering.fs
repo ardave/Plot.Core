@@ -112,3 +112,14 @@ namespace Plot.Core.LineChart
             pb.AddLine(pStart, pEnd) |> ignore
             let path = pb.Build()
             ctx.DrawText(settings.Title, settings.Font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+
+        let drawLegend seriesList settings (ctx:IImageProcessingContext<Rgba32>) =
+            seriesList
+            |> List.fold(fun xpos series ->
+                let pb = PathBuilder()
+                pb |> addLine (PointF(xpos, 1000.f)) (PointF(xpos + 100.f, 1000.f))
+                let path = pb.Build()
+                ctx.DrawText(series.title, settings.Font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+                xpos + 100.f
+            ) 0.f
+            |> ignore

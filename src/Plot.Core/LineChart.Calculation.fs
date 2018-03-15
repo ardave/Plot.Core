@@ -94,7 +94,6 @@ namespace Plot.Core.LineChart
 
         let internal scalePointsToGrid upperLeft lowerRight firstPoint seriesList =
             let minMaxes = getMinMaxes firstPoint seriesList
-            let series = seriesList |> List.head
             let scalingFactors = calculateScalingFactors upperLeft lowerRight minMaxes
 
             let scaledSeriesList =

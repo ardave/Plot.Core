@@ -27,8 +27,6 @@ module LineChart =
             getMinorGridLinePoints scalingFactors numLines
             |> drawMinorGridLines settings
 
-    let drawLegend seriesList (ctx:IImageProcessingContext<Rgba32>) = ()
-
     let createLineChart settings seriesList =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
         let upperLeft, lowerRight, drawMajorGridLinesFunc = drawMajorGridLines settings img
@@ -37,6 +35,7 @@ module LineChart =
             fillBackground
             drawMajorGridLinesFunc
             drawTitle settings
+            // drawLegend seriesList settings
         ]
 
         seriesList
@@ -53,7 +52,7 @@ module LineChart =
                                                 drawMinY minMaxes upperLeft lowerRight settings.Font
                                                 drawMaxY minMaxes upperLeft settings.Font
                                                 drawMinorGridLinesFunc
-                                                drawLegend seriesList
+                                                
                 ] 
                 
                 img.Mutate(fun ctx ->
