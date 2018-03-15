@@ -3,7 +3,7 @@ namespace Plot.Core
     [<AutoOpen>]
     module OriginalPoint =
         open SixLabors.Primitives
-        
+
         type public OriginalPoint<'T> = {
             // Original value for UI/Rendering/Display purposes
             originalX : 'T

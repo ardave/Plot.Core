@@ -1,4 +1,6 @@
 namespace Plot.Core.LineChart
+
+    [<AutoOpen>]
     module internal Rendering =
         open SixLabors.Fonts
         open SixLabors.ImageSharp

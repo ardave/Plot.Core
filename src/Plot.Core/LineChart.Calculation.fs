@@ -1,4 +1,6 @@
 namespace Plot.Core.LineChart
+
+    [<AutoOpen>]
     module internal Calculation =
         open System
         open SixLabors.Primitives

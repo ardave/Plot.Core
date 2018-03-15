@@ -21,15 +21,19 @@ type LineChartTests() =
                         Thickness = 2.f
                     }
             }
-        let anotherSeries = 
+        let inflatedSeries = 
             {
-                series with 
-                    originalPoints = series.originalPoints |> Array.map(fun op -> { op with x = op.x + 10. })
-                    title = "Air Passenger Data 2"
+                originalPoints = Plot.Core.FakeData.hourlyDataDateTimes |> Array.map(fun op -> { op with y = op.y + 100. })
+                title = "Inflated Air Passenger Data"
+                lineStyle = 
+                {
+                    Color = Rgba32.LightBlue
+                    Thickness = 2.f
+                }
             }
 
         let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
-        let image = [series; anotherSeries] |> createLineChart settings
+        let image = [series; inflatedSeries] |> createLineChart settings
         image.Save "AirPassengerData.png"
 
     [<TestMethod>]

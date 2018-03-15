@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="AirPassengerData.fs" />
     <Compile Include="Helpers.fs" />
+    <Compile Include="SampleUsage.fs" />
     <Compile Include="ArrayExtensionsTests.fs" />
     <Compile Include="LineChartTests.fs" />
     <Compile Include="Program.fs" />

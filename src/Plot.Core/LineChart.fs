@@ -1,14 +1,12 @@
 namespace Plot.Core.LineChart
 
+[<AutoOpen>]
 module LineChart =
 
     open System
-
     open SixLabors.ImageSharp
-    
-    open Calculation
-    open Rendering
     open Plot.Core
+    open Plot.Core.LineChart
     open Plot.Core.Settings
 
     let internal getMinorGridLinePoints scalingFactors numLines =
@@ -57,7 +55,7 @@ module LineChart =
                                                 drawMaxY minMaxes upperLeft settings.Font
                                                 drawMinorGridLinesFunc
                 ] 
-                printfn "Running %s...." series.title
+                
                 img.Mutate(fun ctx ->
                     allMutations |> List.iter(fun m -> m ctx)
             )
