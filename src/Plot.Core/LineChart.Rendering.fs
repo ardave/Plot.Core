@@ -100,7 +100,6 @@ namespace Plot.Core.LineChart
             upperLeft, lowerRight, drawFunc
 
         let internal drawMinorGridLines settings minorGridLines (ctx:IImageProcessingContext<Rgba32>) =
-            
             minorGridLines
             |> List.iter (fun line ->
                 let pb = PathBuilder()
