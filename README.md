@@ -19,25 +19,21 @@ And results look like:
 
 The rendering settings can be customized by updating the Settings record from the code above, before passing to **createLineChart**.  The Settings record has the structure:
 ```
+open Plot.Core
+open Plot.Core.LineChart
 open SixLabors.ImageSharp
 
-type RenderingStyle =
-| Points
-| Lines
-
-type LineStyle = {
-    Color     : Rgba32
-    Thickness : float32
-}
-
-type LineChartSettings = {
-    Title          : string
-    Width          : int
-    Height         : int
-    GridColor      : Rgba32
-    DataColor      : Rgba32
-    RenderingStyle : RenderingStyle
-    GridLineStyle  : LineStyle
-    DataLineStyle  : LineStyle
-}
+let series = {
+        originalPoints = Plot.Core.FakeData.hourlyDataDateTimes
+        title = "Air Passenger Data"
+        lineStyle = { Color = Rgba32.Orange; Thickness = 2.f }
+    }
+let inflatedSeries = {
+        originalPoints = Plot.Core.FakeData.hourlyDataDateTimes |> Array.map(fun op -> { op with y = op.y + 100. })
+        title = "Inflated Air Passenger Data"
+        lineStyle = { Color = Rgba32.LightBlue; Thickness = 2.f }
+    }
+let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
+let image = [series; inflatedSeries] |> createLineChart settings
+image.Save "AirPassengerData.png"
 ```

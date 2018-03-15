@@ -1,17 +1,17 @@
 module SampleUsage
-
+// Copied and pasted directly from a unit test,
+// so that the compiler can help verify the code
+// sample that goes in README.md:
 open Plot.Core
 open Plot.Core.LineChart
 open SixLabors.ImageSharp
 
-let series =
-    {
+let series = {
         originalPoints = Plot.Core.FakeData.hourlyDataDateTimes
         title = "Air Passenger Data"
         lineStyle = { Color = Rgba32.Orange; Thickness = 2.f }
     }
-let inflatedSeries = 
-    {
+let inflatedSeries = {
         originalPoints = Plot.Core.FakeData.hourlyDataDateTimes |> Array.map(fun op -> { op with y = op.y + 100. })
         title = "Inflated Air Passenger Data"
         lineStyle = { Color = Rgba32.LightBlue; Thickness = 2.f }
