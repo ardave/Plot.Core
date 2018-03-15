@@ -5,20 +5,6 @@ I couldn't find a chart rendering library to run under .NET Core (specifically f
 
 ## Usage:
 ```
-let points   = Plot.Core.FakeData.hourlyDataDateTimes
-let settings = createLineChartSettings "Air Passenger Data" 1500 500
-let imageOpt = points |> createLineChart settings
-
-match imageOpt with
-| Some img -> img.Save "AirPassengerData.png"
-| None -> failwith "Maybe you didn't include any points for your chart"
-```
-
-And results look like:
-![Line chart showing airline passengers over time](https://raw.githubusercontent.com/ardave/Plot.Core/master/AirPassengerData.png)
-
-The rendering settings can be customized by updating the Settings record from the code above, before passing to **createLineChart**.  The Settings record has the structure:
-```
 open Plot.Core
 open Plot.Core.LineChart
 open SixLabors.ImageSharp
@@ -36,4 +22,23 @@ let inflatedSeries = {
 let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
 let image = [series; inflatedSeries] |> createLineChart settings
 image.Save "AirPassengerData.png"
+```
+
+And results look like:
+![Line chart showing airline passengers over time](https://raw.githubusercontent.com/ardave/Plot.Core/master/AirPassengerData.png)
+
+The rendering settings can be customized by updating the Settings record from the code above, before passing to **createLineChart**.  The Settings record has the structure:
+```
+open SixLabors.ImageSharp
+
+type LineChartSettings = {
+    Title               : string
+    Width               : int
+    Height              : int
+    Font                : SixLabors.Fonts.Font
+    GridLineStyle       : LineStyle
+    MinorGridLineStyle  : LineStyle
+    HorizontalGridLines : int option
+    VerticalGridLines   : int option
+}
 ```
