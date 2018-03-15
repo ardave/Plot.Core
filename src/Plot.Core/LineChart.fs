@@ -62,25 +62,3 @@ module LineChart =
             )
         )
         img
-
-        // let series = seriesList |> List.head
-        // match series.originalPoints |> Array.tryGet 0 with
-        // | None -> None
-        // | Some firstPoint ->
-        //     let scaledSeries, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint seriesList
-        //     let drawDataLinesFunc      = drawDataLines scaledSeries
-        //     let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
-
-        //     let allMutations = backgroundMutations @ [
-        //                                     drawDataLinesFunc
-        //                                     drawMaxX minMaxes lowerRight settings.Font
-        //                                     drawMinX minMaxes upperLeft lowerRight settings.Font
-        //                                     drawMinY minMaxes upperLeft lowerRight settings.Font
-        //                                     drawMaxY minMaxes upperLeft settings.Font
-        //                                     drawMinorGridLinesFunc
-        //                                 ]
-
-        //     img.Mutate(fun ctx ->
-        //         allMutations |> List.iter(fun m -> m ctx)
-        //     )
-        //     Some img
