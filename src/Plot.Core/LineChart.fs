@@ -39,22 +39,20 @@ module LineChart =
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint seriesList
 
-                let backgroundMutations = [ 
+                let backgroundMutations = [
                     fillBackground
                     drawMajorGridLinesFunc
                     drawTitle settings
-                    drawLegend seriesList settings
+                    drawLegend seriesList settings upperLeft lowerRight
                 ]
                 let drawSeriesFuncs = scaledSeriesList |> List.map drawDataLines
                 let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
-                let allMutations = backgroundMutations @ drawSeriesFuncs @[
+                let allMutations = backgroundMutations @ drawSeriesFuncs @ [
                                                 drawMaxX minMaxes lowerRight settings.Font
                                                 drawMinX minMaxes upperLeft lowerRight settings.Font
                                                 drawMinY minMaxes upperLeft lowerRight settings.Font
                                                 drawMaxY minMaxes upperLeft settings.Font
-                                                drawMinorGridLinesFunc
-                                                
-                ]
+                                                drawMinorGridLinesFunc ]
                 img.Mutate(fun ctx ->
                     allMutations |> List.iter(fun m -> m ctx))
         img

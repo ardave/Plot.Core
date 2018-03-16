@@ -68,8 +68,8 @@ namespace Plot.Core.LineChart
         let internal drawMinX minMaxes upperLeft lowerRight (font:Font) ctx = 
             let minXStr = minMaxes.minX.originalValue.ToString()
             let pb = PathBuilder()
-            let p3 = PointF(float32 upperLeft.x , float32 lowerRight.y + font.Size)
-            let p4 = PointF(float32 lowerRight.x, float32 lowerRight.y + font.Size)
+            let p3 = PointF(float32 upperLeft.x , float32 lowerRight.y + font.Size * 0.5f)
+            let p4 = PointF(float32 lowerRight.x, float32 lowerRight.y + font.Size * 0.5f)
             pb.AddLine(p3, p4) |> ignore
             let path = pb.Build()
             drawText minXStr font Rgba32.Black path ctx
@@ -77,8 +77,8 @@ namespace Plot.Core.LineChart
         let internal drawMaxX minMaxes lowerRight (font:Font) ctx =
             let maxXStr = minMaxes.maxX.originalValue.ToString()
             let pbText4 = PathBuilder()
-            let p5 = PointF(float32 lowerRight.x - font.Size * float32 maxXStr.Length * 0.5f, float32 lowerRight.y + font.Size)
-            let p6 = PointF(float32 lowerRight.x + font.Size * float32 maxXStr.Length * 0.5f, float32 lowerRight.y + font.Size)
+            let p5 = PointF(float32 lowerRight.x - font.Size * float32 maxXStr.Length * 0.5f, float32 lowerRight.y + font.Size * 0.5f)
+            let p6 = PointF(float32 lowerRight.x + font.Size * float32 maxXStr.Length * 0.5f, float32 lowerRight.y + font.Size * 0.5f)
             pbText4.AddLine(p5, p6) |> ignore
             let path = pbText4.Build()
             drawText maxXStr font Rgba32.Black path ctx
@@ -111,7 +111,6 @@ namespace Plot.Core.LineChart
                 let pb = PathBuilder()
                 pb.AddLine(line.start.ToPointF, line.endd.ToPointF) |> ignore
                 draw settings.MinorGridLineStyle.Color settings.MinorGridLineStyle.Thickness <| pb.Build() <| ctx)
-                
 
         let internal drawTitle settings ctx =
             let pb = PathBuilder()
@@ -120,13 +119,31 @@ namespace Plot.Core.LineChart
             let path = pb.Build()
             drawText settings.Title settings.Font Rgba32.Black path ctx
 
-        let drawLegend (seriesList:TimeSeries<'T> list) settings ctx =
+        let drawLegend (seriesList:TimeSeries<'T> list) settings upperLeft lowerRight ctx =
+            let font = SystemFonts.CreateFont(settings.Font.Name, settings.Font.Size / 2.f, FontStyle.Regular)
+            let vSpacing = float32 lowerRight.y + font.Size * 3.f
+            
             seriesList
-            |> List.fold(fun xpos series ->
+            |> List.fold(fun lineX series ->
+                let pb2 = PathBuilder()
+                let p3 = PointF(lineX, float32 lowerRight.y + vSpacing)
+                let p4 = PointF(lineX + 20.f, float32 lowerRight.y + vSpacing)
+                pb2 |> addLine p3 p4
+                let path2 = pb2.Build()
+                draw series.lineStyle.Color series.lineStyle.Thickness path2 ctx
+                printfn "Adding a %A line from %A to %A" series.lineStyle.Color p3 p4
+
+                let textX = lineX + 20.f
+
                 let pb = PathBuilder()
-                pb |> addLine (PointF(xpos, 1000.f)) (PointF(xpos + 100.f, 1000.f))
+                let textWidth = font.Size * float32 series.title.Length
+                let p1 = PointF(textX, float32 lowerRight.y + font.Size * 3.f)
+                let p2 = PointF(textX + textWidth, float32 lowerRight.y + font.Size * 3.f)
+                pb |> addLine p1 p2
                 let path = pb.Build()
-                drawText series.title settings.Font Rgba32.Black path ctx
-                xpos + 100.f
-            ) 0.f
+                drawText series.title font Rgba32.Black path ctx
+                textX + textWidth
+            ) (float32 upperLeft.x)
             |> ignore
+
+
