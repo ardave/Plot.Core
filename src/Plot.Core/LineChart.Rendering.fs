@@ -121,7 +121,7 @@ namespace Plot.Core.LineChart
 
         let drawLegend (seriesList:TimeSeries<'T> list) settings upperLeft lowerRight ctx =
             let font = SystemFonts.CreateFont(settings.Font.Name, settings.Font.Size / 2.f, FontStyle.Regular)
-            let vSpacing = float32 lowerRight.y + font.Size * 3.f
+            let vSpacing = font.Size * 3.f
             
             seriesList
             |> List.fold(fun lineX series ->
