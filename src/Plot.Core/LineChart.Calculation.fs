@@ -182,11 +182,8 @@ namespace Plot.Core.LineChart
             let w = float settings.Width
             let h = float settings.Height
             let proportion = 0.9 // proportion of image used for the grid
-
-            {
-                upperLeft  = { scaledX = w * (1. - proportion); scaledY = h * (1. - proportion) }
-                intersect  = { scaledX = w * (1. - proportion); scaledY = h * proportion }
-                lowerRight = { scaledX = w * proportion;        scaledY = proportion }
-            }
+            let upperLeft  = { scaledX = w * (1. - proportion); scaledY = h * (1. - proportion) }
+            let lowerRight = { scaledX = w * proportion;        scaledY = h * proportion }
+            AxisPoints.Create upperLeft lowerRight
 
  

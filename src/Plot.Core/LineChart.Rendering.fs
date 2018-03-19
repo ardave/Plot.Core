@@ -145,10 +145,8 @@ namespace Plot.Core.LineChart
                 let p4 = PointF(lineX + 20.f, float32 axisPoints.lowerRight.scaledY + size.Height)
                 pb2 |> addLine p3 p4
                 let path2 = pb2.Build()
-                printfn "path2 bounds %A" path2.Bounds
                 draw series.lineStyle.Color series.lineStyle.Thickness path2 ctx
-                printfn "Adding a %A line from %A to %A" series.lineStyle.Color p3 p4
-
+                
                 let textX = lineX + 20.f
 
                 let pb = PathBuilder()
@@ -157,7 +155,6 @@ namespace Plot.Core.LineChart
                 let p2 = PointF(textX + textWidth, float32 axisPoints.lowerRight.scaledY + font.Size * 3.f)
                 pb |> addLine p1 p2
                 let path = pb.Build()
-                printfn "path bounds %A" path.Bounds
                 drawText series.title font Rgba32.Black path ctx
                 textX + textWidth
             ) (float32 axisPoints.upperLeft.scaledX)
