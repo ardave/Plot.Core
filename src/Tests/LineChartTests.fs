@@ -68,15 +68,14 @@ type LineChartTests() =
 
     [<TestMethod>]
     member __.``scalePointsToGrid should fit the points correctly``() =
-        let upperLeft  = { x = 150.;  y = 50.; originalX  = 150.  }
-        let lowerRight = { x = 1350.; y = 450.; originalX = 1350. }
+        let axisPoints = AxisPoints.Create { scaledX = 150.; scaledY = 50.} { scaledX = 1350.; scaledY = 450. }
         let series = { originalPoints = FakeData.hourlyDataDateTimes; title = "whatever"; lineStyle = { Color = Rgba32.White; Thickness = 2.f }}
-        let scaledSeries, _, _ = scalePointsToGrid upperLeft lowerRight series.originalPoints.[0] [series]
+        let scaledSeries, _, _ = scalePointsToGrid axisPoints series.originalPoints.[0] [series]
         
-        let fartherLeftThanUpperLeft   p = p.scaledX < upperLeft.x
-        let fartherUpThanUpperLeft     p = p.scaledY < upperLeft.y
-        let fartherRightThanLowerRight p = p.scaledX > lowerRight.x
-        let fartherDownThanLowerRight  p = p.scaledY > lowerRight.y
+        let fartherLeftThanUpperLeft   p = p.scaledX < axisPoints.upperLeft.scaledX
+        let fartherUpThanUpperLeft     p = p.scaledY < axisPoints.upperLeft.scaledY
+        let fartherRightThanLowerRight p = p.scaledX > axisPoints.lowerRight.scaledX
+        let fartherDownThanLowerRight  p = p.scaledY > axisPoints.lowerRight.scaledY
 
         [
             fartherLeftThanUpperLeft

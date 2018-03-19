@@ -19,7 +19,19 @@ namespace Plot.Core.LineChart
             maxX : MinMax<'T>
             minY : float
             maxY : float
+        }
+
+        type internal AxisPoints = {
+            upperLeft  : ScaledPoint
+            intersect  : ScaledPoint
+            lowerRight : ScaledPoint
         } 
+        with static member Create ul lr = 
+                {
+                    upperLeft = ul
+                    lowerRight = lr
+                    intersect = { scaledX = ul.scaledX; scaledY = lr.scaledY }
+                }
 
         let minMaxesCreate minX maxX minY maxY = 
             {
@@ -58,43 +70,41 @@ namespace Plot.Core.LineChart
             minMaxes    : MinMaxes<'T>
             chartWidth  : float
             chartHeight : float
-            upperLeft   : OriginalPoint<'U>
-            lowerRight  : OriginalPoint<'U>
+            axisPoints  : AxisPoints
             pointWidth  : float
             pointHeight : float
         } 
 
-        let createScalingFactors minMaxes upperLeft lowerRight = 
+        let createScalingFactors minMaxes axisPoints = 
                 {
-                    minMaxes = minMaxes
-                    chartWidth = lowerRight.x - upperLeft.x
-                    chartHeight = lowerRight.y - upperLeft.y
-                    upperLeft = upperLeft
-                    lowerRight = lowerRight
-                    pointWidth = minMaxes.maxX.value - minMaxes.minX.value
+                    minMaxes    = minMaxes
+                    chartWidth  = axisPoints.lowerRight.scaledX - axisPoints.upperLeft.scaledX
+                    chartHeight = axisPoints.lowerRight.scaledY - axisPoints.upperLeft.scaledY
+                    axisPoints  = axisPoints 
+                    pointWidth  = minMaxes.maxX.value - minMaxes.minX.value
                     pointHeight = minMaxes.maxY - minMaxes.minY
                 }
 
-        let internal calculateScalingFactors upperLeft lowerRight minMaxes =
-            createScalingFactors minMaxes upperLeft lowerRight
+        let internal calculateScalingFactors axisPoints minMaxes =
+            createScalingFactors minMaxes axisPoints
 
         let internal scaleOneYCoordinate sf y =
             let pctH = (sf.minMaxes.maxY - y) / sf.pointHeight
-            pctH * sf.chartHeight + sf.upperLeft.y
+            pctH * sf.chartHeight + sf.axisPoints.upperLeft.scaledY
 
         let internal scalePointToGrid sf p =
             let pctW = (p.x - sf.minMaxes.minX.value) / sf.pointWidth
             let pctH = (sf.minMaxes.maxY - p.y) / sf.pointHeight
             let scaledPoint = 
                 {
-                    scaledX = pctW * sf.chartWidth + sf.upperLeft.x
-                    scaledY = pctH * sf.chartHeight + sf.upperLeft.y
+                    scaledX = pctW * sf.chartWidth + sf.axisPoints.upperLeft.scaledX
+                    scaledY = pctH * sf.chartHeight + sf.axisPoints.upperLeft.scaledY
                 }
             scaledPoint
 
-        let internal scalePointsToGrid upperLeft lowerRight firstPoint seriesList =
+        let internal scalePointsToGrid axisPoints firstPoint seriesList =
             let minMaxes = getMinMaxes firstPoint seriesList
-            let scalingFactors = calculateScalingFactors upperLeft lowerRight minMaxes
+            let scalingFactors = calculateScalingFactors axisPoints minMaxes
 
             let scaledSeriesList =
                 seriesList
@@ -167,12 +177,6 @@ namespace Plot.Core.LineChart
             let pStart = PointF(starting - titleWidth * 0.25f, y)
             let pEnd   = PointF(starting + titleWidth * 0.75f, y)
             pStart, pEnd
-
-        type internal AxisPoints = {
-            upperLeft  : ScaledPoint
-            intersect  : ScaledPoint
-            lowerRight : ScaledPoint
-        }
 
         let internal calculateAxisPoints settings =
             let w = float settings.Width

@@ -30,7 +30,7 @@ module LineChart =
     let createLineChart settings seriesList =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
         let axisPoints = calculateAxisPoints settings
-        let upperLeft, lowerRight, drawMajorGridLinesFunc = drawMajorGridLines settings img
+        let drawMajorGridLinesFunc = drawMajorGridLines axisPoints settings
         
 
         match seriesList |> List.tryHead with
@@ -39,22 +39,22 @@ module LineChart =
             match firstSeries.originalPoints |> Array.tryGet 0 with
             | None      -> ()
             | Some firstPoint -> 
-                let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint seriesList
-                let endingY, drawMinXfunc = drawMinX minMaxes upperLeft lowerRight settings.Font
+                let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
+                let endingY, drawMinXfunc = drawMinX minMaxes axisPoints settings.Font
 
                 let backgroundMutations = [
                     fillBackground
                     drawMajorGridLinesFunc
                     drawTitle settings
-                    drawLegend seriesList settings upperLeft lowerRight
+                    drawLegend seriesList settings axisPoints
                 ]
                 let drawSeriesFuncs = scaledSeriesList |> List.map drawDataLines
                 let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
                 let allMutations = backgroundMutations @ drawSeriesFuncs @ [
-                                                drawMaxX minMaxes lowerRight settings.Font
+                                                drawMaxX minMaxes axisPoints.lowerRight settings.Font
                                                 drawMinXfunc
-                                                drawMinY minMaxes upperLeft lowerRight settings.Font
-                                                drawMaxY minMaxes upperLeft settings.Font
+                                                drawMinY minMaxes axisPoints settings.Font
+                                                drawMaxY minMaxes axisPoints.upperLeft settings.Font
                                                 drawMinorGridLinesFunc ]
                 img.Mutate(fun ctx ->
                     allMutations |> List.iter(fun m -> m ctx))

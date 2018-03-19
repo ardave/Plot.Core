@@ -23,7 +23,7 @@ namespace Plot.Core.LineChart
         let internal originalToPointF o = PointF(float32 o.x, float32 o.y)
         let internal pointf x y = PointF(x, y)
         let internal addLine p1 p2 (pb:PathBuilder) = pb.AddLine(p1, p2) |> ignore
-        let internal addLineF (p1:ScaledPoint) (p2:ScaledPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
+        let internal addLineF (p1:ScaledPoint) (p2:ScaledPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF) |> ignore
         let private getSize font text = TextMeasurer.Measure(text, new RendererOptions(font))
 
         let internal addLines points (pb:PathBuilder) =
@@ -55,36 +55,36 @@ namespace Plot.Core.LineChart
             let maxYStr = minMaxes.maxY.ToString()
             let size = getSize font maxYStr
             let pbText2 = PathBuilder()
-            let startX = float32 upperLeft.x - (size.Width + spacing)
-            let endX = float32 upperLeft.x
-            let y = float32 upperLeft.y + (size.Height / 2.f)
+            let startX = float32 upperLeft.scaledX - (size.Width + spacing)
+            let endX = float32 upperLeft.scaledX
+            let y = float32 upperLeft.scaledY + (size.Height / 2.f)
             let p1 = PointF(startX, y)
             let p2 = PointF(endX, y)
             pbText2.AddLine(p1, p2) |> ignore
             let path = pbText2.Build()
             drawText maxYStr font Rgba32.Black path ctx
 
-        let internal drawMinY minMaxes upperLeft lowerRight font ctx =
+        let internal drawMinY minMaxes axisPoints font ctx =
             let spacing = 3.f
             let minYStr = minMaxes.minY.ToString()
             let size    = getSize font minYStr
             let pbText  = PathBuilder()
-            let startX  = float32 upperLeft.x - (size.Width + spacing)
-            let endX    = float32 lowerRight.x
-            let y       = float32 lowerRight.y - size.Height / 2.f
+            let startX  = float32 axisPoints.upperLeft.scaledX - (size.Width + spacing)
+            let endX    = float32 axisPoints.lowerRight.scaledX
+            let y       = float32 axisPoints.lowerRight.scaledY - size.Height / 2.f
             pbText.AddLine(PointF(startX, y), PointF(endX, y)) |> ignore
             let path = pbText.Build()
             drawText minYStr font Rgba32.Black path ctx
 
-        let internal drawMinX minMaxes upperLeft lowerRight font =
+        let internal drawMinX minMaxes axisPoints font =
             let minXStr = minMaxes.minX.originalValue.ToString()
             let size = getSize font minXStr
             let pb = PathBuilder()
-            let p3 = PointF(float32 upperLeft.x , float32 lowerRight.y + size.Height / 2.f)
-            let p4 = PointF(float32 lowerRight.x, float32 lowerRight.y + size.Height / 2.f)
+            let p3 = PointF(float32 axisPoints.upperLeft.scaledX , float32 axisPoints.lowerRight.scaledY + size.Height / 2.f)
+            let p4 = PointF(float32 axisPoints.lowerRight.scaledX, float32 axisPoints.lowerRight.scaledY + size.Height / 2.f)
             pb.AddLine(p3, p4) |> ignore
             let path = pb.Build()
-            let endingY = lowerRight.y + float size.Height
+            let endingY = axisPoints.lowerRight.scaledY + float size.Height
             let f = drawText minXStr font Rgba32.Black path
             endingY, f
 
@@ -92,8 +92,8 @@ namespace Plot.Core.LineChart
             let maxXStr = minMaxes.maxX.originalValue.ToString()
             let size = getSize font maxXStr
             let pbText4 = PathBuilder()
-            let p5 = PointF(float32 lowerRight.x - size.Width, float32 lowerRight.y + size.Height / 2.f)
-            let p6 = PointF(float32 lowerRight.x + size.Width, float32 lowerRight.y + size.Height / 2.f)
+            let p5 = PointF(float32 lowerRight.scaledX - size.Width, float32 lowerRight.scaledY + size.Height / 2.f)
+            let p6 = PointF(float32 lowerRight.scaledX + size.Width, float32 lowerRight.scaledY + size.Height / 2.f)
             pbText4.AddLine(p5, p6) |> ignore
             let path = pbText4.Build()
             drawText maxXStr font Rgba32.Black path ctx
@@ -113,12 +113,12 @@ namespace Plot.Core.LineChart
             let drawFunc ctx = draw scaledSeries.lineStyle.Color scaledSeries.lineStyle.Thickness path ctx
             drawFunc
 
-        let internal drawMajorGridLines settings img =
-            let pbAxes = PathBuilder()
-            let upperLeft, lowerRight = img |> addAxes pbAxes
-            let path = pbAxes.Build()
+        let internal drawMajorGridLines axisPoints settings =
+            let pb = PathBuilder()
+            pb |> addLineF axisPoints.upperLeft axisPoints.intersect
+            let path = pb.Build()
             let drawFunc ctx = draw settings.GridLineStyle.Color settings.GridLineStyle.Thickness path ctx
-            upperLeft, lowerRight, drawFunc
+            drawFunc
 
         let internal drawMinorGridLines settings minorGridLines ctx =
             minorGridLines
@@ -134,15 +134,15 @@ namespace Plot.Core.LineChart
             let path = pb.Build()
             drawText settings.Title settings.Font Rgba32.Black path ctx
 
-        let drawLegend (seriesList:TimeSeries<'T> list) settings upperLeft lowerRight ctx =
+        let drawLegend (seriesList:TimeSeries<'T> list) settings axisPoints ctx =
             let font = SystemFonts.CreateFont(settings.Font.Name, settings.Font.Size / 2.f, FontStyle.Regular)
 
             seriesList
             |> List.fold(fun lineX series ->
                 let size = getSize font series.title
                 let pb2 = PathBuilder()
-                let p3 = PointF(lineX, float32 lowerRight.y + size.Height)
-                let p4 = PointF(lineX + 20.f, float32 lowerRight.y + size.Height)
+                let p3 = PointF(lineX, float32 axisPoints.lowerRight.scaledY + size.Height)
+                let p4 = PointF(lineX + 20.f, float32 axisPoints.lowerRight.scaledY + size.Height)
                 pb2 |> addLine p3 p4
                 let path2 = pb2.Build()
                 printfn "path2 bounds %A" path2.Bounds
@@ -153,14 +153,14 @@ namespace Plot.Core.LineChart
 
                 let pb = PathBuilder()
                 let textWidth = font.Size * float32 series.title.Length
-                let p1 = PointF(textX, float32 lowerRight.y + font.Size * 3.f)
-                let p2 = PointF(textX + textWidth, float32 lowerRight.y + font.Size * 3.f)
+                let p1 = PointF(textX, float32 axisPoints.lowerRight.scaledY + font.Size * 3.f)
+                let p2 = PointF(textX + textWidth, float32 axisPoints.lowerRight.scaledY + font.Size * 3.f)
                 pb |> addLine p1 p2
                 let path = pb.Build()
                 printfn "path bounds %A" path.Bounds
                 drawText series.title font Rgba32.Black path ctx
                 textX + textWidth
-            ) (float32 upperLeft.x)
+            ) (float32 axisPoints.upperLeft.scaledX)
             |> ignore
 
 
