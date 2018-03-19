@@ -30,33 +30,30 @@ module LineChart =
     let createLineChart settings seriesList =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
         let axisPoints = calculateAxisPoints settings
-        let drawMajorGridLinesFunc = drawMajorGridLines axisPoints settings
-        
+
+        img.Mutate(fun ctx ->
+            fillBackground ctx
+            drawMajorGridLines axisPoints settings ctx
+            drawTitle settings ctx
+            drawLegend seriesList settings axisPoints ctx
+            )
 
         match seriesList |> List.tryHead with
         | None             -> ()
         | Some firstSeries ->
             match firstSeries.originalPoints |> Array.tryGet 0 with
-            | None      -> ()
+            | None            -> ()
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
                 let endingY, drawMinXfunc = drawMinX minMaxes axisPoints settings.Font
 
-                let backgroundMutations = [
-                    fillBackground
-                    drawMajorGridLinesFunc
-                    drawTitle settings
-                    drawLegend seriesList settings axisPoints
-                ]
-                let drawSeriesFuncs = scaledSeriesList |> List.map drawDataLines
-                let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
-                let allMutations = backgroundMutations @ drawSeriesFuncs @ [
-                                                drawMaxX minMaxes axisPoints.lowerRight settings.Font
-                                                drawMinXfunc
-                                                drawMinY minMaxes axisPoints settings.Font
-                                                drawMaxY minMaxes axisPoints.upperLeft settings.Font
-                                                drawMinorGridLinesFunc ]
                 img.Mutate(fun ctx ->
-                    allMutations |> List.iter(fun m -> m ctx))
+                    assembleMinorGridLinesFunctions settings scalingFactors ctx
+                    scaledSeriesList |> List.iter(fun x -> drawDataLines x ctx)
+                    drawMaxX minMaxes axisPoints.lowerRight settings.Font ctx
+                    drawMinXfunc ctx
+                    drawMinY minMaxes axisPoints settings.Font ctx
+                    drawMaxY minMaxes axisPoints.upperLeft settings.Font ctx
+                    )
         img
 

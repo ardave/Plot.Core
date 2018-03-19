@@ -1,4 +1,5 @@
 namespace Plot.Core.LineChart
+    open SixLabors.Fonts
 
     [<AutoOpen>]
     module internal Calculation =
@@ -32,7 +33,6 @@ namespace Plot.Core.LineChart
                     lowerRight = lr
                     intersect = { scaledX = ul.scaledX; scaledY = lr.scaledY }
                 }
-
         let minMaxesCreate minX maxX minY maxY = 
             {
                 minX = minMaxCreate minX
@@ -42,6 +42,8 @@ namespace Plot.Core.LineChart
             }
 
         let private pointToMinMax point = { originalValue = point.originalX; value = point.x }
+
+        let private getSize font text = TextMeasurer.Measure(text, new RendererOptions(font))
 
         let internal getMinMaxes firstPoint seriesList =
             let initialState =
@@ -186,4 +188,11 @@ namespace Plot.Core.LineChart
             let lowerRight = { scaledX = w * proportion;        scaledY = h * proportion }
             AxisPoints.Create upperLeft lowerRight
 
- 
+        let calcMinXPosition minMaxes axisPoints font =
+            let minXStr = minMaxes.minX.originalValue.ToString()
+            let size = getSize font minXStr
+            let startPoint = { scaledX = axisPoints.upperLeft.scaledX;  scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
+            let endPoint   = { scaledX = axisPoints.lowerRight.scaledX; scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
+
+            let endingY = axisPoints.lowerRight.scaledY + float size.Height
+            endingY, (startPoint, endPoint)

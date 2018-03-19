@@ -93,7 +93,6 @@ type LineChartTests() =
     member __.``Axis points should be calculated correctly``() =
         let settings = createLineChartSettings "whatever" 1500 500
         let axisPoints = calculateAxisPoints settings
-        printfn "The axisPoints are\n%A" axisPoints
         let shouldEqualWithinTolerance = shouldEqualWithin 0.001
 
         axisPoints.upperLeft.scaledX  |> shouldEqualWithinTolerance 150.
