@@ -6,6 +6,7 @@ open Plot.Core
 open Plot.Core.LineChart.Calculation
 open Plot.Core.LineChart.LineChart
 open Helpers
+open Plot.Core.Settings
 
 [<TestClass>]
 type LineChartTests() =
@@ -88,3 +89,16 @@ type LineChartTests() =
             |> Array.exists f
             |> shouldEqual false
         )
+
+    [<TestMethod>]
+    member __.``Axis points should be calculated correctly``() =
+        let settings = createLineChartSettings "whatever" 1500 500
+        let axisPoints = calculateAxisPoints settings
+        let shouldEqualWithinTolerance = shouldEqualWithin 0.001
+
+        axisPoints.upperLeft.scaledX  |> shouldEqualWithinTolerance 150.
+        axisPoints.upperLeft.scaledY  |> shouldEqualWithinTolerance 50.
+        axisPoints.intersect.scaledX  |> shouldEqualWithinTolerance 150.
+        axisPoints.intersect.scaledY  |> shouldEqualWithinTolerance 450.
+        axisPoints.lowerRight.scaledX |> shouldEqualWithinTolerance 1350.
+        axisPoints.lowerRight.scaledY |> shouldEqualWithinTolerance 450.

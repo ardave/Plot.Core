@@ -151,7 +151,7 @@ namespace Plot.Core.LineChart
             |> List.map(fun n ->
                 let x = sf.minMaxes.minX.value + increment * float n
                 let start = { x = x; y = sf.minMaxes.minY; originalX = x } |> scalePointToGrid sf
-                let endd   = { x = x; y = sf.minMaxes.maxY; originalX = x } |> scalePointToGrid sf
+                let endd  = { x = x; y = sf.minMaxes.maxY; originalX = x } |> scalePointToGrid sf
                 { 
                     direction = Horizontal
                     label     = (x.ToString())
@@ -167,3 +167,22 @@ namespace Plot.Core.LineChart
             let pStart = PointF(starting - titleWidth * 0.25f, y)
             let pEnd   = PointF(starting + titleWidth * 0.75f, y)
             pStart, pEnd
+
+        type internal AxisPoints = {
+            upperLeft  : ScaledPoint
+            intersect  : ScaledPoint
+            lowerRight : ScaledPoint
+        }
+
+        let internal calculateAxisPoints settings =
+            let w = float settings.Width
+            let h = float settings.Height
+            let proportion = 0.9 // proportion of image used for the grid
+
+            {
+                upperLeft  = { scaledX = w * (1. - proportion); scaledY = h * (1. - proportion) }
+                intersect  = { scaledX = w * (1. - proportion); scaledY = h * proportion }
+                lowerRight = { scaledX = w * proportion;        scaledY = proportion }
+            }
+
+ 

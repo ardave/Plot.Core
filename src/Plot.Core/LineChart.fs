@@ -29,7 +29,9 @@ module LineChart =
 
     let createLineChart settings seriesList =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
+        let axisPoints = calculateAxisPoints settings
         let upperLeft, lowerRight, drawMajorGridLinesFunc = drawMajorGridLines settings img
+        
 
         match seriesList |> List.tryHead with
         | None             -> ()
@@ -38,6 +40,7 @@ module LineChart =
             | None      -> ()
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint seriesList
+                let endingY, drawMinXfunc = drawMinX minMaxes upperLeft lowerRight settings.Font
 
                 let backgroundMutations = [
                     fillBackground
@@ -49,7 +52,7 @@ module LineChart =
                 let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
                 let allMutations = backgroundMutations @ drawSeriesFuncs @ [
                                                 drawMaxX minMaxes lowerRight settings.Font
-                                                drawMinX minMaxes upperLeft lowerRight settings.Font
+                                                drawMinXfunc
                                                 drawMinY minMaxes upperLeft lowerRight settings.Font
                                                 drawMaxY minMaxes upperLeft settings.Font
                                                 drawMinorGridLinesFunc ]
