@@ -37,19 +37,6 @@ namespace Plot.Core.LineChart
             let pointFs = points |> Array.map scaledToOriginal
             addLines pointFs pb
 
-        let private addAxes pb (img:Image<_>) =
-            let x1 = (float img.Width  * 0.1)
-            let y1 = (float img.Height * 0.1)
-            let x2 = (float img.Width  * 0.1)
-            let y2 = (float img.Height * 0.9)
-            let x3 = (float img.Width  * 0.9)
-            let y3 = (float img.Height * 0.9)
-            let p1 = { x = x1; y = y1; originalX = x1 }
-            let p2 = { x = x2; y = y2; originalX = x2 }
-            let p3 = { x = x3; y = y3; originalX = x3 }
-            pb |> addLines [|p1; p2; p3|]
-            p1, p3
-
         let internal drawMaxY minMaxes upperLeft font ctx =
             let spacing = 3.f
             let maxYStr = minMaxes.maxY.ToString()
@@ -76,27 +63,21 @@ namespace Plot.Core.LineChart
             let path = pbText.Build()
             drawText minYStr font Rgba32.Black path ctx
 
-        let internal drawMinX minMaxes axisPoints font =
+        let internal drawMinX minXPosition minMaxes font =
             let minXStr = minMaxes.minX.originalValue.ToString()
-            let size = getSize font minXStr
             let pb = PathBuilder()
-            let p3 = PointF(float32 axisPoints.upperLeft.scaledX , float32 axisPoints.lowerRight.scaledY + size.Height / 2.f)
-            let p4 = PointF(float32 axisPoints.lowerRight.scaledX, float32 axisPoints.lowerRight.scaledY + size.Height / 2.f)
-            pb.AddLine(p3, p4) |> ignore
+            pb.AddLine(minXPosition |> fst |> scaledToPointF, minXPosition |> snd |> scaledToPointF) |> ignore
             let path = pb.Build()
-            let endingY = axisPoints.lowerRight.scaledY + float size.Height
             let f = drawText minXStr font Rgba32.Black path
-            endingY, f
+            f
 
-        let internal drawMaxX minMaxes lowerRight font ctx =
+        let internal drawMaxX maxXPosition minMaxes font =
             let maxXStr = minMaxes.maxX.originalValue.ToString()
-            let size = getSize font maxXStr
             let pbText4 = PathBuilder()
-            let p5 = PointF(float32 lowerRight.scaledX - size.Width, float32 lowerRight.scaledY + size.Height / 2.f)
-            let p6 = PointF(float32 lowerRight.scaledX + size.Width, float32 lowerRight.scaledY + size.Height / 2.f)
-            pbText4.AddLine(p5, p6) |> ignore
+            pbText4.AddLine(maxXPosition |> fst |> scaledToPointF, maxXPosition |> snd |> scaledToPointF) |> ignore
             let path = pbText4.Build()
-            drawText maxXStr font Rgba32.Black path ctx
+            let f = drawText maxXStr font Rgba32.Black path
+            f
 
         let internal fillBackground ctx = fill Rgba32.White ctx
 

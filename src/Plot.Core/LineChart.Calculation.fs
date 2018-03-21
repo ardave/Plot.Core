@@ -194,5 +194,12 @@ namespace Plot.Core.LineChart
             let startPoint = { scaledX = axisPoints.upperLeft.scaledX;  scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
             let endPoint   = { scaledX = axisPoints.lowerRight.scaledX; scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
 
-            let endingY = axisPoints.lowerRight.scaledY + float size.Height
-            endingY, (startPoint, endPoint)
+            startPoint, endPoint
+
+        let calcMaxXPosition minMaxes font lowerRight =
+            let spacing = 3.f
+            let maxYStr = minMaxes.maxY.ToString()
+            let size = getSize font maxYStr
+            let startPoint = { scaledX = lowerRight.scaledX - float size.Width; scaledY = lowerRight.scaledY + float size.Height / 2. }
+            let endPoint   = { scaledX = lowerRight.scaledX + float size.Width; scaledY = lowerRight.scaledY + float size.Height / 2. }
+            startPoint, endPoint

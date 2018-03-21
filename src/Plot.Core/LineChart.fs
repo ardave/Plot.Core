@@ -30,7 +30,7 @@ module LineChart =
     let createLineChart settings seriesList =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
         let axisPoints = calculateAxisPoints settings
-
+        
         img.Mutate(fun ctx ->
             fillBackground ctx
             drawMajorGridLines axisPoints settings ctx
@@ -45,13 +45,14 @@ module LineChart =
             | None            -> ()
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
-                let endingY, drawMinXfunc = drawMinX minMaxes axisPoints settings.Font
-
+                let minXPosition = calcMinXPosition minMaxes axisPoints settings.Font
+                let maxXPosition = calcMaxXPosition minMaxes settings.Font axisPoints.lowerRight
+                
                 img.Mutate(fun ctx ->
                     assembleMinorGridLinesFunctions settings scalingFactors ctx
                     scaledSeriesList |> List.iter(fun x -> drawDataLines x ctx)
-                    drawMaxX minMaxes axisPoints.lowerRight settings.Font ctx
-                    drawMinXfunc ctx
+                    drawMaxX maxXPosition minMaxes settings.Font ctx
+                    drawMinX minXPosition minMaxes settings.Font ctx
                     drawMinY minMaxes axisPoints settings.Font ctx
                     drawMaxY minMaxes axisPoints.upperLeft settings.Font ctx
                     )
