@@ -48,6 +48,7 @@ module LineChart =
                 let minXPosition = calcMinXPosition minMaxes axisPoints settings.Font
                 let maxXPosition = calcMaxXPosition minMaxes settings.Font axisPoints.lowerRight
                 let minYPosition = calcMinYPosition minMaxes axisPoints settings.Font
+                let maxYPosition = calcMaxYPosition minMaxes axisPoints.upperLeft settings.Font
                 
                 img.Mutate(fun ctx ->
                     assembleMinorGridLinesFunctions settings scalingFactors ctx
@@ -55,7 +56,7 @@ module LineChart =
                     drawMaxX maxXPosition minMaxes settings.Font ctx
                     drawMinX minXPosition minMaxes settings.Font ctx
                     drawMinY minYPosition minMaxes settings.Font ctx
-                    drawMaxY minMaxes axisPoints.upperLeft settings.Font ctx
+                    drawMaxY minMaxes maxYPosition settings.Font ctx
                     )
         img
 

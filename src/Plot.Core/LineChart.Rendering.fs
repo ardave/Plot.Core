@@ -37,18 +37,11 @@ namespace Plot.Core.LineChart
             let pointFs = points |> Array.map scaledToOriginal
             addLines pointFs pb
 
-        let internal drawMaxY minMaxes upperLeft font ctx =
-            let spacing = 3.f
+        let internal drawMaxY minMaxes maxYPosition font ctx =
             let maxYStr = minMaxes.maxY.ToString()
-            let size = getSize font maxYStr
-            let pbText2 = PathBuilder()
-            let startX = float32 upperLeft.scaledX - (size.Width + spacing)
-            let endX = float32 upperLeft.scaledX
-            let y = float32 upperLeft.scaledY + (size.Height / 2.f)
-            let p1 = PointF(startX, y)
-            let p2 = PointF(endX, y)
-            pbText2.AddLine(p1, p2) |> ignore
-            let path = pbText2.Build()
+            let path = PathBuilder()
+                        .AddLine(maxYPosition |> fst |> scaledToPointF, maxYPosition |> snd |> scaledToPointF)
+                        .Build()
             drawText maxYStr font Rgba32.Black path ctx
 
         let internal drawMinY minYPosition minMaxes font =

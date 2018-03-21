@@ -215,13 +215,13 @@ namespace Plot.Core.LineChart
             let endPoint   = { scaledX = endx; scaledY = y}
             startPoint, endPoint
 
-
-            // let size    = getSize font minYStr
-            // let pbText  = PathBuilder()
-            // let startX  = float32 axisPoints.upperLeft.scaledX - (size.Width + spacing)
-            // let endX    = float32 axisPoints.lowerRight.scaledX
-            // let y       = float32 axisPoints.lowerRight.scaledY - size.Height / 2.f
-            // pbText.AddLine(PointF(startX, y), PointF(endX, y)) |> ignore
-            // let path = pbText.Build()
-            // drawText minYStr font Rgba32.Black path ctx
-            
+        let internal calcMaxYPosition minMaxes upperLeft font = 
+            let spacing    = 3.
+            let maxYStr    = minMaxes.maxY.ToString()
+            let size       = getSize font maxYStr
+            let startX     = upperLeft.scaledX - (float size.Width + spacing)
+            let endX       = upperLeft.scaledX
+            let y          = upperLeft.scaledY + (float size.Height / 2.)
+            let startPoint = { scaledX = startX; scaledY =  y }
+            let endPoint   = { scaledX = endX; scaledY = y }
+            startPoint, endPoint
