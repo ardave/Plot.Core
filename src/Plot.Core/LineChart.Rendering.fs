@@ -51,17 +51,13 @@ namespace Plot.Core.LineChart
             let path = pbText2.Build()
             drawText maxYStr font Rgba32.Black path ctx
 
-        let internal drawMinY minMaxes axisPoints font ctx =
-            let spacing = 3.f
+        let internal drawMinY minYPosition minMaxes font =
             let minYStr = minMaxes.minY.ToString()
-            let size    = getSize font minYStr
-            let pbText  = PathBuilder()
-            let startX  = float32 axisPoints.upperLeft.scaledX - (size.Width + spacing)
-            let endX    = float32 axisPoints.lowerRight.scaledX
-            let y       = float32 axisPoints.lowerRight.scaledY - size.Height / 2.f
-            pbText.AddLine(PointF(startX, y), PointF(endX, y)) |> ignore
-            let path = pbText.Build()
-            drawText minYStr font Rgba32.Black path ctx
+            let path = PathBuilder()
+                        .AddLine(minYPosition |> fst |> scaledToPointF, minYPosition |> snd |> scaledToPointF)
+                        .Build()
+            let f = drawText minYStr font Rgba32.Black path
+            f
 
         let internal drawMinX minXPosition minMaxes font =
             let minXStr = minMaxes.minX.originalValue.ToString()
