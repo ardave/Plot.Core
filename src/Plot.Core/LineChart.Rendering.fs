@@ -54,17 +54,17 @@ namespace Plot.Core.LineChart
 
         let internal drawMinX minXPosition minMaxes font =
             let minXStr = minMaxes.minX.originalValue.ToString()
-            let pb = PathBuilder()
-            pb.AddLine(minXPosition |> fst |> scaledToPointF, minXPosition |> snd |> scaledToPointF) |> ignore
-            let path = pb.Build()
+            let path = PathBuilder()
+                        .AddLine(minXPosition |> fst |> scaledToPointF, minXPosition |> snd |> scaledToPointF)
+                        .Build()
             let f = drawText minXStr font Rgba32.Black path
             f
 
         let internal drawMaxX maxXPosition minMaxes font =
             let maxXStr = minMaxes.maxX.originalValue.ToString()
-            let pbText4 = PathBuilder()
-            pbText4.AddLine(maxXPosition |> fst |> scaledToPointF, maxXPosition |> snd |> scaledToPointF) |> ignore
-            let path = pbText4.Build()
+            let path = PathBuilder()
+                        .AddLine(maxXPosition |> fst |> scaledToPointF, maxXPosition |> snd |> scaledToPointF)
+                        .Build()
             let f = drawText maxXStr font Rgba32.Black path
             f
 
@@ -98,10 +98,10 @@ namespace Plot.Core.LineChart
                 draw settings.MinorGridLineStyle.Color settings.MinorGridLineStyle.Thickness <| pb.Build() <| ctx)
 
         let internal drawTitle settings ctx =
-            let pb = PathBuilder()
             let pStart, pEnd = calculateTitleLocation settings
-            pb.AddLine(pStart, pEnd) |> ignore
-            let path = pb.Build()
+            let path = PathBuilder()
+                        .AddLine(pStart, pEnd)
+                        .Build()
             drawText settings.Title settings.Font Rgba32.Black path ctx
 
         let drawLegend (seriesList:TimeSeries<'T> list) settings axisPoints ctx =
