@@ -130,4 +130,38 @@ namespace Plot.Core.LineChart
             ) (float32 axisPoints.upperLeft.scaledX)
             |> ignore
 
+        let internal getMinorGridLinePoints scalingFactors numLines =
+            let horizontalLines =
+                calcMinorGridLineIncrement scalingFactors.pointHeight numLines
+                |> calcMinorHorizontalGridLinesPoints numLines scalingFactors
+
+            let verticalLines =
+                calcMinorGridLineIncrement scalingFactors.pointWidth numLines
+                |> calcMinorVerticalGridLinesPoints numLines scalingFactors
+
+            horizontalLines @ verticalLines
+
+        let internal assembleMinorGridLinesFunctions settings scalingFactors =
+            match settings.HorizontalGridLines with
+            | None -> ignore
+            | Some numLines ->
+                getMinorGridLinePoints scalingFactors numLines
+                |> drawMinorGridLines settings
+
+        let internal drawLineChart axisPoints settings seriesList scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition =
+            let img = new Image<Rgba32>(settings.Width, settings.Height)
+            img.Mutate(fun ctx ->
+                fillBackground ctx
+                drawMajorGridLines axisPoints settings ctx
+                drawTitle settings ctx
+                drawLegend seriesList settings axisPoints ctx
+                assembleMinorGridLinesFunctions settings scalingFactors ctx
+                scaledSeriesList |> List.iter(fun x -> drawDataLines x ctx)
+                drawMaxX maxXPosition minMaxes settings.Font ctx
+                drawMinX minXPosition minMaxes settings.Font ctx
+                drawMinY minYPosition minMaxes settings.Font ctx
+                drawMaxY minMaxes maxYPosition settings.Font ctx
+                )
+            img
+
 

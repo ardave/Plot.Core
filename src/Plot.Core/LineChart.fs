@@ -9,40 +9,22 @@ module LineChart =
     open Plot.Core.LineChart
     open Plot.Core.Settings
 
-    let internal getMinorGridLinePoints scalingFactors numLines =
-        let horizontalLines =
-            calcMinorGridLineIncrement scalingFactors.pointHeight numLines
-            |> calcMinorHorizontalGridLinesPoints numLines scalingFactors
-
-        let verticalLines =
-            calcMinorGridLineIncrement scalingFactors.pointWidth numLines
-            |> calcMinorVerticalGridLinesPoints numLines scalingFactors
-
-        horizontalLines @ verticalLines
-
-    let internal assembleMinorGridLinesFunctions settings scalingFactors =
-        match settings.HorizontalGridLines with
-        | None -> ignore
-        | Some numLines ->
-            getMinorGridLinePoints scalingFactors numLines
-            |> drawMinorGridLines settings
+    // let internal assembleMinorGridLinesFunctions settings scalingFactors =
+    //     match settings.HorizontalGridLines with
+    //     | None -> ignore
+    //     | Some numLines ->
+    //         getMinorGridLinePoints scalingFactors numLines
+    //         |> drawMinorGridLines settings
 
     let createLineChart settings seriesList =
         let img = new Image<Rgba32>(settings.Width, settings.Height)
         let axisPoints = calculateAxisPoints settings
-        
-        img.Mutate(fun ctx ->
-            fillBackground ctx
-            drawMajorGridLines axisPoints settings ctx
-            drawTitle settings ctx
-            drawLegend seriesList settings axisPoints ctx
-            )
 
         match seriesList |> List.tryHead with
-        | None             -> ()
+        | None             -> None
         | Some firstSeries ->
             match firstSeries.originalPoints |> Array.tryGet 0 with
-            | None            -> ()
+            | None            -> None
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
                 let minXPosition = calcMinXPosition minMaxes axisPoints settings.Font
@@ -50,13 +32,5 @@ module LineChart =
                 let minYPosition = calcMinYPosition minMaxes axisPoints settings.Font
                 let maxYPosition = calcMaxYPosition minMaxes axisPoints.upperLeft settings.Font
                 
-                img.Mutate(fun ctx ->
-                    assembleMinorGridLinesFunctions settings scalingFactors ctx
-                    scaledSeriesList |> List.iter(fun x -> drawDataLines x ctx)
-                    drawMaxX maxXPosition minMaxes settings.Font ctx
-                    drawMinX minXPosition minMaxes settings.Font ctx
-                    drawMinY minYPosition minMaxes settings.Font ctx
-                    drawMaxY minMaxes maxYPosition settings.Font ctx
-                    )
-        img
-
+                let img = drawLineChart axisPoints settings seriesList scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition
+                Some img

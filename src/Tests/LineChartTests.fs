@@ -34,8 +34,9 @@ type LineChartTests() =
             }
 
         let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
-        let image = [series; inflatedSeries] |> createLineChart settings
-        image.Save "AirPassengerData.png"
+        match [series; inflatedSeries] |> createLineChart settings with
+        | Some image -> image.Save "AirPassengerData.png"
+        | None       -> failwith "Something went wrong."
 
     [<TestMethod>]
     member __.``getMinMaxes should get the correct min maxes``() =

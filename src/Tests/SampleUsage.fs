@@ -18,4 +18,7 @@ let inflatedSeries = {
     }
 let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
 let image = [series; inflatedSeries] |> createLineChart settings
-image.Save "AirPassengerData.png"
+
+match image with
+| Some i -> i.Save "AirPassengerData.png"
+| None   -> failwith "Maybe you provided an empty series of data points."
