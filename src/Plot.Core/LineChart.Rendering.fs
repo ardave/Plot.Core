@@ -86,6 +86,7 @@ namespace Plot.Core.LineChart
         let internal drawMajorGridLines axisPoints settings =
             let pb = PathBuilder()
             pb |> addLineF axisPoints.upperLeft axisPoints.intersect
+            pb |> addLineF axisPoints.intersect axisPoints.lowerRight
             let path = pb.Build()
             let drawFunc ctx = draw settings.GridLineStyle.Color settings.GridLineStyle.Thickness path ctx
             drawFunc
@@ -129,17 +130,6 @@ namespace Plot.Core.LineChart
                 textX + textWidth
             ) (float32 axisPoints.upperLeft.scaledX)
             |> ignore
-
-        let internal getMinorGridLinePoints scalingFactors numLines =
-            let horizontalLines =
-                calcMinorGridLineIncrement scalingFactors.pointHeight numLines
-                |> calcMinorHorizontalGridLinesPoints numLines scalingFactors
-
-            let verticalLines =
-                calcMinorGridLineIncrement scalingFactors.pointWidth numLines
-                |> calcMinorVerticalGridLinesPoints numLines scalingFactors
-
-            horizontalLines @ verticalLines
 
         let internal assembleMinorGridLinesFunctions settings scalingFactors =
             match settings.HorizontalGridLines with

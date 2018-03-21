@@ -172,6 +172,17 @@ namespace Plot.Core.LineChart
                 }
             )
 
+        let internal getMinorGridLinePoints scalingFactors numLines =
+            let horizontalLines =
+                calcMinorGridLineIncrement scalingFactors.pointHeight numLines
+                |> calcMinorHorizontalGridLinesPoints numLines scalingFactors
+
+            let verticalLines =
+                calcMinorGridLineIncrement scalingFactors.pointWidth numLines
+                |> calcMinorVerticalGridLinesPoints numLines scalingFactors
+
+            horizontalLines @ verticalLines
+
         let internal calculateTitleLocation settings =
             let starting = float32 settings.Width / 2.f
             let y = (float32 settings.Height * 0.1f) - (settings.Font.Size * 0.5f)
