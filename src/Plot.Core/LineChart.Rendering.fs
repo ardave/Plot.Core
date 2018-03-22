@@ -52,19 +52,21 @@ namespace Plot.Core.LineChart
             let f = drawText minYStr font Rgba32.Black path
             f
 
-        let internal drawMinX minXPosition minMaxes font =
+        let internal drawMinX minXPosition minMaxes settings xAxisLabelsFontSize =
             let minXStr = minMaxes.minX.originalValue.ToString()
             let path = PathBuilder()
                         .AddLine(minXPosition |> fst |> scaledToPointF, minXPosition |> snd |> scaledToPointF)
                         .Build()
+            let font = SystemFonts.CreateFont(settings.Font.Name, xAxisLabelsFontSize, FontStyle.Regular)
             let f = drawText minXStr font Rgba32.Black path
             f
 
-        let internal drawMaxX maxXPosition minMaxes font =
+        let internal drawMaxX maxXPosition minMaxes settings xAxisLabelsFontSize =
             let maxXStr = minMaxes.maxX.originalValue.ToString()
             let path = PathBuilder()
                         .AddLine(maxXPosition |> fst |> scaledToPointF, maxXPosition |> snd |> scaledToPointF)
                         .Build()
+            let font = SystemFonts.CreateFont(settings.Font.Name, xAxisLabelsFontSize, FontStyle.Regular)
             let f = drawText maxXStr font Rgba32.Black path
             f
 
@@ -138,7 +140,7 @@ namespace Plot.Core.LineChart
                 getMinorGridLinePoints scalingFactors numLines
                 |> drawMinorGridLines settings
 
-        let internal drawLineChart axisPoints settings seriesList scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition =
+        let internal drawLineChart axisPoints settings seriesList scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize =
             let img = new Image<Rgba32>(settings.Width, settings.Height)
             img.Mutate(fun ctx ->
                 fillBackground ctx
@@ -147,8 +149,8 @@ namespace Plot.Core.LineChart
                 drawLegend seriesList settings axisPoints ctx
                 assembleMinorGridLinesFunctions settings scalingFactors ctx
                 scaledSeriesList |> List.iter(fun x -> drawDataLines x ctx)
-                drawMaxX maxXPosition minMaxes settings.Font ctx
-                drawMinX minXPosition minMaxes settings.Font ctx
+                drawMaxX maxXPosition minMaxes settings xAxisLabelsFontSize ctx
+                drawMinX minXPosition minMaxes settings xAxisLabelsFontSize ctx
                 drawMinY minYPosition minMaxes settings.Font ctx
                 drawMaxY minMaxes maxYPosition settings.Font ctx
                 )

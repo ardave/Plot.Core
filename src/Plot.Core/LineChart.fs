@@ -16,10 +16,12 @@ module LineChart =
             | None            -> None
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
-                let minXPosition = calcMinXPosition minMaxes axisPoints settings.Font
-                let maxXPosition = calcMaxXPosition minMaxes settings.Font axisPoints.lowerRight
-                let minYPosition = calcMinYPosition minMaxes axisPoints settings.Font
-                let maxYPosition = calcMaxYPosition minMaxes axisPoints.upperLeft settings.Font
+                let verticalSpace = (float settings.Height - axisPoints.intersect.scaledX) * 0.6
+                let xAxisLabelsFontSize = getFontSize settings minMaxes verticalSpace
+                let minXPosition = calcMinXPosition minMaxes axisPoints settings xAxisLabelsFontSize
+                let maxXPosition = calcMaxXPosition minMaxes axisPoints settings xAxisLabelsFontSize 
+                let minYPosition = calcMinYPosition minMaxes axisPoints settings
+                let maxYPosition = calcMaxYPosition minMaxes axisPoints settings
                 
-                let img = drawLineChart axisPoints settings seriesList scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition
+                let img = drawLineChart axisPoints settings seriesList scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize
                 Some img

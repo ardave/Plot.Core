@@ -199,26 +199,42 @@ namespace Plot.Core.LineChart
             let lowerRight = { scaledX = w * proportion;        scaledY = h * proportion }
             AxisPoints.Create upperLeft lowerRight
 
-        let calcMinXPosition minMaxes axisPoints font =
+        let getFontSize settings minMaxes verticalSpace =
             let minXStr = minMaxes.minX.originalValue.ToString()
+            [|0..30|]
+                |> Array.map float32
+                |> Array.filter(fun x ->
+                    let font = SystemFonts.CreateFont(settings.Font.Name, x, FontStyle.Regular)
+                    float (getSize font minXStr).Height < verticalSpace )
+                |> Array.max
+
+        let calcMinXPosition minMaxes axisPoints settings fontSize =
+            let minXStr = minMaxes.minX.originalValue.ToString()
+            let font = SystemFonts.CreateFont(settings.Font.Name, fontSize, FontStyle.Regular)
             let size = getSize font minXStr
             let startPoint = { scaledX = axisPoints.upperLeft.scaledX;  scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
             let endPoint   = { scaledX = axisPoints.lowerRight.scaledX; scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
 
             startPoint, endPoint
 
-        let calcMaxXPosition minMaxes font lowerRight =
-            let spacing = 3.f
-            let maxYStr = minMaxes.maxY.ToString()
-            let size = getSize font maxYStr
-            let startPoint = { scaledX = lowerRight.scaledX - float size.Width; scaledY = lowerRight.scaledY + float size.Height / 2. }
-            let endPoint   = { scaledX = lowerRight.scaledX + float size.Width; scaledY = lowerRight.scaledY + float size.Height / 2. }
+        let calcMaxXPosition minMaxes axisPoints settings fontSize =
+            let maxXStr = minMaxes.maxX.originalValue.ToString()
+            let font = SystemFonts.CreateFont(settings.Font.Name, fontSize, FontStyle.Regular)
+            let size = getSize font maxXStr
+            let startPoint = { scaledX = axisPoints.lowerRight.scaledX - float size.Width; scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
+            printfn "maxXStr: %A" maxXStr
+            printfn "fontSize: %A" fontSize
+            printfn "settings font size: %A" settings.Font.Size
+            printfn "size: %A" size
+            printfn "startPoint:\n%A" startPoint
+            printfn "axisPoints:\n%A" axisPoints
+            let endPoint   = { scaledX = axisPoints.lowerRight.scaledX + float size.Width; scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
             startPoint, endPoint
 
-        let internal calcMinYPosition minMaxes axisPoints font =
+        let internal calcMinYPosition minMaxes axisPoints settings =
             let spacing    = 3.
             let minYStr    = minMaxes.minY.ToString()
-            let size       = getSize font minYStr
+            let size       = getSize settings.Font minYStr
             let startx     = axisPoints.upperLeft.scaledX - (float size.Width + spacing)
             let endx       = axisPoints.lowerRight.scaledX
             let y          = axisPoints.lowerRight.scaledY - float size.Height / 2.
@@ -226,13 +242,13 @@ namespace Plot.Core.LineChart
             let endPoint   = { scaledX = endx; scaledY = y}
             startPoint, endPoint
 
-        let internal calcMaxYPosition minMaxes upperLeft font = 
+        let internal calcMaxYPosition minMaxes axisPoints settings = 
             let spacing    = 3.
             let maxYStr    = minMaxes.maxY.ToString()
-            let size       = getSize font maxYStr
-            let startX     = upperLeft.scaledX - (float size.Width + spacing)
-            let endX       = upperLeft.scaledX
-            let y          = upperLeft.scaledY + (float size.Height / 2.)
+            let size       = getSize settings.Font maxYStr
+            let startX     = axisPoints.upperLeft.scaledX - (float size.Width + spacing)
+            let endX       = axisPoints.upperLeft.scaledX
+            let y          = axisPoints.upperLeft.scaledY + (float size.Height / 2.)
             let startPoint = { scaledX = startX; scaledY =  y }
             let endPoint   = { scaledX = endX; scaledY = y }
             startPoint, endPoint
