@@ -107,9 +107,9 @@ namespace Plot.Core.LineChart
                         .Build()
             drawText settings.Title settings.Font Rgba32.Black path ctx
 
-        let drawLegend (seriesList:TimeSeries<'T> list) settings axisPoints ctx =
-            let font = SystemFonts.CreateFont(settings.Font.Name, settings.Font.Size / 2.f, FontStyle.Regular)
-
+        let drawLegend (seriesList:TimeSeries<'T> list) settings axisPoints fontSize ctx =
+            let font = SystemFonts.CreateFont(settings.Font.Name, fontSize, FontStyle.Regular)
+            printfn "Legend font size is: %A" fontSize
             seriesList
             |> List.fold(fun lineX series ->
                 let size = getSize font series.title
@@ -129,7 +129,9 @@ namespace Plot.Core.LineChart
                 pb |> addLine p1 p2
                 let path = pb.Build()
                 drawText series.title font Rgba32.Black path ctx
+                printfn "Drawing legend for '%s' from (%A, %A) to (%A, %A)" series.title p3 p4 p1 p2
                 textX + textWidth
+
             ) (float32 axisPoints.upperLeft.scaledX)
             |> ignore
 
@@ -140,13 +142,13 @@ namespace Plot.Core.LineChart
                 getMinorGridLinePoints scalingFactors numLines
                 |> drawMinorGridLines settings
 
-        let internal drawLineChart axisPoints settings seriesList scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize =
+        let internal drawLineChart axisPoints settings seriesList scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize legendFontSize =
             let img = new Image<Rgba32>(settings.Width, settings.Height)
             img.Mutate(fun ctx ->
                 fillBackground ctx
                 drawMajorGridLines axisPoints settings ctx
                 drawTitle settings ctx
-                drawLegend seriesList settings axisPoints ctx
+                drawLegend seriesList settings axisPoints legendFontSize ctx
                 assembleMinorGridLinesFunctions settings scalingFactors ctx
                 scaledSeriesList |> List.iter(fun x -> drawDataLines x ctx)
                 drawMaxX maxXPosition minMaxes settings xAxisLabelsFontSize ctx

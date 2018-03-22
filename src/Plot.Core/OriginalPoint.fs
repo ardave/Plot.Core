@@ -40,5 +40,16 @@ namespace Plot.Core
         type internal ScaledTimeSeries<'T> = {
             scaledPoints : ScaledPoint array
             lineStyle    : LineStyle
-            title          : string
+            title        : string
+        }
+
+        type internal LegendEntry = {
+            title         : string
+            startPosition : ScaledPoint
+            endPosition   : ScaledPoint
+        }
+
+        type internal Legend = {
+            fontSize : float
+            entries  : LegendEntry list
         }

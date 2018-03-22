@@ -222,12 +222,6 @@ namespace Plot.Core.LineChart
             let font = SystemFonts.CreateFont(settings.Font.Name, fontSize, FontStyle.Regular)
             let size = getSize font maxXStr
             let startPoint = { scaledX = axisPoints.lowerRight.scaledX - float size.Width; scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
-            printfn "maxXStr: %A" maxXStr
-            printfn "fontSize: %A" fontSize
-            printfn "settings font size: %A" settings.Font.Size
-            printfn "size: %A" size
-            printfn "startPoint:\n%A" startPoint
-            printfn "axisPoints:\n%A" axisPoints
             let endPoint   = { scaledX = axisPoints.lowerRight.scaledX + float size.Width; scaledY = axisPoints.lowerRight.scaledY + float size.Height / 2. }
             startPoint, endPoint
 
@@ -252,3 +246,6 @@ namespace Plot.Core.LineChart
             let startPoint = { scaledX = startX; scaledY =  y }
             let endPoint   = { scaledX = endX; scaledY = y }
             startPoint, endPoint
+
+        let calculateLegend fontSize = 
+            ()
