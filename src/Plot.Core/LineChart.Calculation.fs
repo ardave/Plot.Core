@@ -233,10 +233,10 @@ namespace Plot.Core.LineChart
             let endx       = axisPoints.lowerRight.scaledX
             let y          = axisPoints.lowerRight.scaledY - float size.Height / 2.
             let startPoint = { scaledX = startx; scaledY = y }
-            let endPoint   = { scaledX = endx; scaledY = y}
+            let endPoint   = { scaledX = endx;   scaledY = y}
             startPoint, endPoint
 
-        let internal calcMaxYPosition minMaxes axisPoints settings = 
+        let internal calcMaxYPosition minMaxes axisPoints settings =
             let spacing    = 3.
             let maxYStr    = minMaxes.maxY.ToString()
             let size       = getSize settings.Font maxYStr
@@ -255,19 +255,23 @@ namespace Plot.Core.LineChart
 
             let mapping (startX, y) (ts:TimeSeries<'a>) =
                 let size = getSize font ts.title
-                let newX = startX + float size.Width + 1. // + 1. to prevent text from wrapping
+                let lineSampleWidth = float settings.Width / 50.
+                let lineStartX = startX
+                let lineEndX = lineStartX + lineSampleWidth
+                let textStartX = lineEndX + 2.
+                let textEndX = textStartX + float size.Width + float settings.Width / 100.
+                
                 let legendEntry =
                     {
                         title             = ts.title
-                        lineStartPosition = { scaledX = startX; scaledY = y }
-                        lineEndPosition   = { scaledX = startX; scaledY = y }
-                        textStartPosition = { scaledX = startX; scaledY = y }
-                        textEndPosition   = { scaledX = newX;   scaledY = y }
+                        lineStartPosition = { scaledX = lineStartX; scaledY = y }
+                        lineEndPosition   = { scaledX = lineEndX;   scaledY = y }
+                        textStartPosition = { scaledX = textStartX ; scaledY = y }
+                        textEndPosition   = { scaledX = textEndX;   scaledY = y }
                         lineStyle         = ts.lineStyle
                     }
 
-                printfn "Size of %s is %A, startPosition = %A, endPosition = %A" ts.title size legendEntry.textStartPosition legendEntry.textEndPosition
-                legendEntry, (newX, y)
+                legendEntry, (textEndX, y)
             let state = startX, startY
             let lst, _ = List.mapFold mapping state seriesList
 
@@ -276,5 +280,4 @@ namespace Plot.Core.LineChart
                     fontSize = fontSize
                     entries  = lst
                 }
-            printfn "The legend is:\n%A" legend
             legend

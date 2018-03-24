@@ -112,6 +112,10 @@ namespace Plot.Core.LineChart
             let font = SystemFonts.CreateFont(settings.Font.Name, legend.fontSize, FontStyle.Regular)
             legend.entries 
                 |> List.iter(fun ent ->
+                    let path2 = PathBuilder()
+                                 .AddLine(ent.lineStartPosition.ToPointF, ent.lineEndPosition.ToPointF)
+                                 .Build()
+                    draw ent.lineStyle.Color ent.lineStyle.Thickness path2 ctx
                     let path = PathBuilder()
                                 .AddLine(ent.textStartPosition.ToPointF, ent.textEndPosition.ToPointF)
                                 .Build()
