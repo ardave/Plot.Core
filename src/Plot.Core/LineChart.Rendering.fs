@@ -96,9 +96,10 @@ namespace Plot.Core.LineChart
         let internal drawMinorGridLines settings minorGridLines ctx =
             minorGridLines
             |> List.iter (fun line ->
-                let pb = PathBuilder()
-                pb.AddLine(line.start.ToPointF, line.endd.ToPointF) |> ignore
-                draw settings.MinorGridLineStyle.Color settings.MinorGridLineStyle.Thickness <| pb.Build() <| ctx)
+                let path = PathBuilder()
+                            .AddLine(line.start.ToPointF, line.endd.ToPointF)
+                            .Build()
+                draw settings.MinorGridLineStyle.Color settings.MinorGridLineStyle.Thickness path ctx)
 
         let internal drawTitle settings ctx =
             let pStart, pEnd = calculateTitleLocation settings
@@ -107,33 +108,15 @@ namespace Plot.Core.LineChart
                         .Build()
             drawText settings.Title settings.Font Rgba32.Black path ctx
 
-        let drawLegend (seriesList:TimeSeries<'T> list) settings axisPoints fontSize ctx =
-            let font = SystemFonts.CreateFont(settings.Font.Name, fontSize, FontStyle.Regular)
-            printfn "Legend font size is: %A" fontSize
-            seriesList
-            |> List.fold(fun lineX series ->
-                let size = getSize font series.title
-                let pb2 = PathBuilder()
-                let p3 = PointF(lineX, float32 axisPoints.lowerRight.scaledY + size.Height)
-                let p4 = PointF(lineX + 20.f, float32 axisPoints.lowerRight.scaledY + size.Height)
-                pb2 |> addLine p3 p4
-                let path2 = pb2.Build()
-                draw series.lineStyle.Color series.lineStyle.Thickness path2 ctx
-                
-                let textX = lineX + 20.f
-
-                let pb = PathBuilder()
-                let textWidth = font.Size * float32 series.title.Length
-                let p1 = PointF(textX, float32 axisPoints.lowerRight.scaledY + font.Size * 3.f)
-                let p2 = PointF(textX + textWidth, float32 axisPoints.lowerRight.scaledY + font.Size * 3.f)
-                pb |> addLine p1 p2
-                let path = pb.Build()
-                drawText series.title font Rgba32.Black path ctx
-                printfn "Drawing legend for '%s' from (%A, %A) to (%A, %A)" series.title p3 p4 p1 p2
-                textX + textWidth
-
-            ) (float32 axisPoints.upperLeft.scaledX)
-            |> ignore
+        let drawLegend settings legend ctx =
+            let font = SystemFonts.CreateFont(settings.Font.Name, legend.fontSize, FontStyle.Regular)
+            legend.entries 
+                |> List.iter(fun ent ->
+                    let path = PathBuilder()
+                                .AddLine(ent.textStartPosition.ToPointF, ent.textEndPosition.ToPointF)
+                                .Build()
+                    drawText ent.title font Rgba32.Black path ctx
+                )
 
         let internal assembleMinorGridLinesFunctions settings scalingFactors =
             match settings.HorizontalGridLines with
@@ -142,13 +125,13 @@ namespace Plot.Core.LineChart
                 getMinorGridLinePoints scalingFactors numLines
                 |> drawMinorGridLines settings
 
-        let internal drawLineChart axisPoints settings seriesList scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize legendFontSize =
+        let internal drawLineChart axisPoints settings scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize legend =
             let img = new Image<Rgba32>(settings.Width, settings.Height)
             img.Mutate(fun ctx ->
                 fillBackground ctx
                 drawMajorGridLines axisPoints settings ctx
                 drawTitle settings ctx
-                drawLegend seriesList settings axisPoints legendFontSize ctx
+                drawLegend settings legend ctx
                 assembleMinorGridLinesFunctions settings scalingFactors ctx
                 scaledSeriesList |> List.iter(fun x -> drawDataLines x ctx)
                 drawMaxX maxXPosition minMaxes settings xAxisLabelsFontSize ctx

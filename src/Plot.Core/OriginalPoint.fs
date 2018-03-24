@@ -44,12 +44,15 @@ namespace Plot.Core
         }
 
         type internal LegendEntry = {
-            title         : string
-            startPosition : ScaledPoint
-            endPosition   : ScaledPoint
+            title             : string
+            lineStartPosition : ScaledPoint
+            lineEndPosition   : ScaledPoint
+            textStartPosition : ScaledPoint
+            textEndPosition   : ScaledPoint
+            lineStyle         : LineStyle
         }
 
         type internal Legend = {
-            fontSize : float
+            fontSize : float32
             entries  : LegendEntry list
         }

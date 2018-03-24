@@ -202,11 +202,11 @@ namespace Plot.Core.LineChart
         let getFontSize settings minMaxes verticalSpace =
             let minXStr = minMaxes.minX.originalValue.ToString()
             [|0..30|]
-                |> Array.map float32
-                |> Array.filter(fun x ->
-                    let font = SystemFonts.CreateFont(settings.Font.Name, x, FontStyle.Regular)
-                    float (getSize font minXStr).Height < verticalSpace )
-                |> Array.max
+            |> Array.map float32
+            |> Array.filter(fun x ->
+                let font = SystemFonts.CreateFont(settings.Font.Name, float32 x, FontStyle.Regular)
+                float (getSize font minXStr).Height < verticalSpace )
+            |> Array.max
 
         let calcMinXPosition minMaxes axisPoints settings fontSize =
             let minXStr = minMaxes.minX.originalValue.ToString()
@@ -247,5 +247,34 @@ namespace Plot.Core.LineChart
             let endPoint   = { scaledX = endX; scaledY = y }
             startPoint, endPoint
 
-        let calculateLegend fontSize = 
-            ()
+        let calculateLegend fontSize xAxisLabelsVerticalSpace legendVerticalSpace axisPoints settings (seriesList:TimeSeries<'a> list) =
+            let font = SystemFonts.CreateFont(settings.Font.Name, fontSize, FontStyle.Regular)
+
+            let startX = axisPoints.intersect.scaledX
+            let startY = axisPoints.intersect.scaledY + xAxisLabelsVerticalSpace + legendVerticalSpace / 2.
+
+            let mapping (startX, y) (ts:TimeSeries<'a>) =
+                let size = getSize font ts.title
+                let newX = startX + float size.Width + 1. // + 1. to prevent text from wrapping
+                let legendEntry =
+                    {
+                        title             = ts.title
+                        lineStartPosition = { scaledX = startX; scaledY = y }
+                        lineEndPosition   = { scaledX = startX; scaledY = y }
+                        textStartPosition = { scaledX = startX; scaledY = y }
+                        textEndPosition   = { scaledX = newX;   scaledY = y }
+                        lineStyle         = ts.lineStyle
+                    }
+
+                printfn "Size of %s is %A, startPosition = %A, endPosition = %A" ts.title size legendEntry.textStartPosition legendEntry.textEndPosition
+                legendEntry, (newX, y)
+            let state = startX, startY
+            let lst, _ = List.mapFold mapping state seriesList
+
+            let legend =
+                {
+                    fontSize = fontSize
+                    entries  = lst
+                }
+            printfn "The legend is:\n%A" legend
+            legend
