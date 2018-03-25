@@ -17,12 +17,12 @@ module LineChart =
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
                 let totalVerticalSpace = (float settings.Height - axisPoints.intersect.scaledY)
-
+                
                 let xAxisLabelsVerticalSpace = totalVerticalSpace * 0.6
-                let xAxisLabelsFontSize = (getFontSize settings minMaxes xAxisLabelsVerticalSpace) - 7.5f
+                let xAxisLabelsFontSize = (getFontSize settings (minMaxes.minX.originalValue.ToString()) xAxisLabelsVerticalSpace) - 7.5f
 
                 let legendVerticalSpace = totalVerticalSpace * 0.4
-                let legendFontSize = getFontSize settings minMaxes legendVerticalSpace
+                let legendFontSize = getFontSize settings (minMaxes.minX.originalValue.ToString()) legendVerticalSpace
 
                 let legend = calculateLegend legendFontSize xAxisLabelsVerticalSpace legendVerticalSpace axisPoints settings seriesList
                 let minXPosition = calcMinXPosition minMaxes axisPoints settings xAxisLabelsFontSize

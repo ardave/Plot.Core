@@ -1,6 +1,7 @@
 namespace Tests
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
+open SixLabors.Fonts
 open SixLabors.ImageSharp
 open Plot.Core
 open Plot.Core.LineChart.Calculation
@@ -102,3 +103,22 @@ type LineChartTests() =
         axisPoints.intersect.scaledY  |> shouldEqualWithinTolerance 450.
         axisPoints.lowerRight.scaledX |> shouldEqualWithinTolerance 1350.
         axisPoints.lowerRight.scaledY |> shouldEqualWithinTolerance 450.
+
+    [<TestMethod>]
+    member __.``getFontSize should calculate the maximum font size that can fit in the defined space``() =
+        let settings = createLineChartSettings "" 1500 500 
+        [10; 25; 50; 100; 200]
+        |> List.map float
+        |> List.iter(fun verticalSpace ->
+            let fontSize = getFontSize settings "whatever" verticalSpace
+            let font = SystemFonts.CreateFont(settings.Font.Name, fontSize, FontStyle.Regular)
+            let size = getSize font "whatever"
+            let height = float size.Height
+            let proportionFilled = height / verticalSpace
+
+            if height > verticalSpace then
+                failwithf "Rendered text height %f was larger than allowed vertical spacing %f" height verticalSpace
+
+            if proportionFilled < 0.75 then
+                failwithf "Rendered text should have filled at least 75%% of available vertical space, but %f / %f = %f" height verticalSpace proportionFilled
+        )
