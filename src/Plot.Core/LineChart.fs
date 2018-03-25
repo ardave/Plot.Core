@@ -17,11 +17,9 @@ module LineChart =
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
                 let totalVerticalSpace = (float settings.Height - axisPoints.intersect.scaledY)
-                printfn "settings.Height: %A" settings.Height
-                printfn "axisPoints.intersect.scaledX: %A" axisPoints.intersect.scaledX
-                printfn "totalVerticalSpace: %A" totalVerticalSpace
+
                 let xAxisLabelsVerticalSpace = totalVerticalSpace * 0.6
-                let xAxisLabelsFontSize = getFontSize settings minMaxes xAxisLabelsVerticalSpace
+                let xAxisLabelsFontSize = (getFontSize settings minMaxes xAxisLabelsVerticalSpace) - 7.5f
 
                 let legendVerticalSpace = totalVerticalSpace * 0.4
                 let legendFontSize = getFontSize settings minMaxes legendVerticalSpace

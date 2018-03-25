@@ -33,7 +33,7 @@ type LineChartTests() =
                 }
             }
 
-        let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
+        let settings = Settings.createLineChartSettings "Air Passenger Data Jan 49 – Dec 60" 5120 2880
         match [series; inflatedSeries] |> createLineChart settings with
         | Some image -> image.Save "AirPassengerData.png"
         | None       -> failwith "Something went wrong."
