@@ -3,61 +3,32 @@ namespace Plot.Core.LineChart
 [<AutoOpen>]
 module LineChart =
 
-    open System
-    open SixLabors.ImageSharp
     open Plot.Core
     open Plot.Core.LineChart
-    open Plot.Core.Settings
-
-    let internal getMinorGridLinePoints scalingFactors numLines =
-        let horizontalLines =
-            calcMinorGridLineIncrement scalingFactors.pointHeight numLines
-            |> calcMinorHorizontalGridLinesPoints numLines scalingFactors
-
-        let verticalLines =
-            calcMinorGridLineIncrement scalingFactors.pointWidth numLines
-            |> calcMinorVerticalGridLinesPoints numLines scalingFactors
-
-        horizontalLines @ verticalLines
-
-    let internal assembleMinorGridLinesFunctions settings scalingFactors =
-        match settings.HorizontalGridLines with
-        | None -> ignore
-        | Some numLines ->
-            getMinorGridLinePoints scalingFactors numLines
-            |> drawMinorGridLines settings
 
     let createLineChart settings seriesList =
-        let img = new Image<Rgba32>(settings.Width, settings.Height)
-        let upperLeft, lowerRight, drawMajorGridLinesFunc = drawMajorGridLines settings img
+        let axisPoints = calculateAxisPoints settings
 
-        let backgroundMutations = [
-            fillBackground
-            drawMajorGridLinesFunc
-            drawTitle settings
-        ]
+        match seriesList |> List.tryHead with
+        | None             -> None
+        | Some firstSeries ->
+            match firstSeries.originalPoints |> Array.tryGet 0 with
+            | None            -> None
+            | Some firstPoint -> 
+                let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
+                let totalVerticalSpace = (float settings.Height - axisPoints.intersect.scaledY)
 
-        seriesList
-        |> List.iter(fun series ->
-            match series.originalPoints |> Array.tryGet 0 with
-            | None -> ()
-            | Some firstPoint ->
-                let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid upperLeft lowerRight firstPoint seriesList
+                let xAxisLabelsVerticalSpace = totalVerticalSpace * 0.6
+                let xAxisLabelsFontSize = (getFontSize settings minMaxes xAxisLabelsVerticalSpace) - 7.5f
 
-                let drawSeriesFuncs = scaledSeriesList |> List.map drawDataLines
+                let legendVerticalSpace = totalVerticalSpace * 0.4
+                let legendFontSize = getFontSize settings minMaxes legendVerticalSpace
 
-                let drawMinorGridLinesFunc = assembleMinorGridLinesFunctions settings scalingFactors
-
-                let allMutations = backgroundMutations @ drawSeriesFuncs @[
-                                                drawMaxX minMaxes lowerRight settings.Font
-                                                drawMinX minMaxes upperLeft lowerRight settings.Font
-                                                drawMinY minMaxes upperLeft lowerRight settings.Font
-                                                drawMaxY minMaxes upperLeft settings.Font
-                                                drawMinorGridLinesFunc
-                ] 
+                let legend = calculateLegend legendFontSize xAxisLabelsVerticalSpace legendVerticalSpace axisPoints settings seriesList
+                let minXPosition = calcMinXPosition minMaxes axisPoints settings xAxisLabelsFontSize
+                let maxXPosition = calcMaxXPosition minMaxes axisPoints settings xAxisLabelsFontSize 
+                let minYPosition = calcMinYPosition minMaxes axisPoints settings
+                let maxYPosition = calcMaxYPosition minMaxes axisPoints settings
                 
-                img.Mutate(fun ctx ->
-                    allMutations |> List.iter(fun m -> m ctx)
-            )
-        )
-        img
+                let img = drawLineChart axisPoints settings scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize legend
+                Some img

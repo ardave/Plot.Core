@@ -11,12 +11,20 @@ namespace Plot.Core.LineChart
         open Plot.Core.Settings
         open LineChart.Calculation
 
+        let private drawText (text:string) (font:Font) (color:Rgba32) (path:IPath) (ctx:IImageProcessingContext<Rgba32>) = 
+            ctx.DrawText(text, font, color, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+        let private draw (color:Rgba32) thickness (path:IPath) (ctx:IImageProcessingContext<Rgba32>) =
+            ctx.Draw(color, thickness, path) |> ignore
+
+        let fill (color:Rgba32) (ctx:IImageProcessingContext<Rgba32>) = ctx.Fill(color) |> ignore
+
         let internal scaledToOriginal f = { x = f.scaledX; y = f.scaledY; originalX = f.scaledX }
         let internal scaledToPointF s = PointF(float32 s.scaledX, float32 s.scaledY)
         let internal originalToPointF o = PointF(float32 o.x, float32 o.y)
         let internal pointf x y = PointF(x, y)
         let internal addLine p1 p2 (pb:PathBuilder) = pb.AddLine(p1, p2) |> ignore
-        let internal addLineF (p1:ScaledPoint) (p2:ScaledPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF)
+        let internal addLineF (p1:ScaledPoint) (p2:ScaledPoint) (pb:PathBuilder) = pb.AddLine(p1.ToPointF, p2.ToPointF) |> ignore
+        let private getSize font text = TextMeasurer.Measure(text, new RendererOptions(font))
 
         let internal addLines points (pb:PathBuilder) =
             points
@@ -29,55 +37,40 @@ namespace Plot.Core.LineChart
             let pointFs = points |> Array.map scaledToOriginal
             addLines pointFs pb
 
-        let private addAxes pb (img:Image<_>) =
-            let x1 = (float img.Width  * 0.1)
-            let y1 = (float img.Height * 0.1)
-            let x2 = (float img.Width  * 0.1)
-            let y2 = (float img.Height * 0.9)
-            let x3 = (float img.Width  * 0.9)
-            let y3 = (float img.Height * 0.9)
-            let p1 = { x = x1; y = y1; originalX = x1 }
-            let p2 = { x = x2; y = y2; originalX = x2 }
-            let p3 = { x = x3; y = y3; originalX = x3 }
-            pb |> addLines [|p1; p2; p3|]
-            p1, p3
-
-        let internal drawMaxY minMaxes upperLeft (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
+        let internal drawMaxY minMaxes maxYPosition font ctx =
             let maxYStr = minMaxes.maxY.ToString()
-            let pbText2 = PathBuilder()
-            let p1 = PointF(float32 upperLeft.x - font.Size * float32 maxYStr.Length, float32 upperLeft.y)
-            let p2 = PointF(float32 upperLeft.x, float32 upperLeft.y)
-            pbText2.AddLine(p1, p2) |> ignore
-            let path = pbText2.Build()
-            ctx.DrawText(maxYStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+            let path = PathBuilder()
+                        .AddLine(maxYPosition |> fst |> scaledToPointF, maxYPosition |> snd |> scaledToPointF)
+                        .Build()
+            drawText maxYStr font Rgba32.Black path ctx
 
-        let internal drawMinY minMaxes upperLeft lowerRight (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
+        let internal drawMinY minYPosition minMaxes font =
             let minYStr = minMaxes.minY.ToString()
-            let pbText = PathBuilder()
-            pbText.AddLine(PointF(float32 upperLeft.x - font.Size * float32 minYStr.Length, float32 lowerRight.y), lowerRight |> originalToPointF) |> ignore
-            let path = pbText.Build()
-            ctx.DrawText(minYStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length))  |> ignore
+            let path = PathBuilder()
+                        .AddLine(minYPosition |> fst |> scaledToPointF, minYPosition |> snd |> scaledToPointF)
+                        .Build()
+            let f = drawText minYStr font Rgba32.Black path
+            f
 
-        let internal drawMinX minMaxes upperLeft lowerRight (font:Font) (ctx:IImageProcessingContext<Rgba32>) = 
+        let internal drawMinX minXPosition minMaxes settings xAxisLabelsFontSize =
             let minXStr = minMaxes.minX.originalValue.ToString()
-            let pb = PathBuilder()
-            let p3 = PointF(float32 upperLeft.x , float32 lowerRight.y + font.Size)
-            let p4 = PointF(float32 lowerRight.x, float32 lowerRight.y + font.Size)
-            pb.AddLine(p3, p4) |> ignore
-            let path = pb.Build()
-            ctx.DrawText(minXStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+            let path = PathBuilder()
+                        .AddLine(minXPosition |> fst |> scaledToPointF, minXPosition |> snd |> scaledToPointF)
+                        .Build()
+            let font = SystemFonts.CreateFont(settings.Font.Name, xAxisLabelsFontSize, FontStyle.Regular)
+            let f = drawText minXStr font Rgba32.Black path
+            f
 
-        let internal drawMaxX minMaxes lowerRight (font:Font) (ctx:IImageProcessingContext<Rgba32>) =
+        let internal drawMaxX maxXPosition minMaxes settings xAxisLabelsFontSize =
             let maxXStr = minMaxes.maxX.originalValue.ToString()
-            let pbText4 = PathBuilder()
-            let p5 = PointF(float32 lowerRight.x - font.Size * float32 maxXStr.Length * 0.5f, float32 lowerRight.y + font.Size)
-            let p6 = PointF(float32 lowerRight.x + font.Size * float32 maxXStr.Length * 0.5f, float32 lowerRight.y + font.Size)
-            pbText4.AddLine(p5, p6) |> ignore
-            let path = pbText4.Build()
-            ctx.DrawText(maxXStr, font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+            let path = PathBuilder()
+                        .AddLine(maxXPosition |> fst |> scaledToPointF, maxXPosition |> snd |> scaledToPointF)
+                        .Build()
+            let font = SystemFonts.CreateFont(settings.Font.Name, xAxisLabelsFontSize, FontStyle.Regular)
+            let f = drawText maxXStr font Rgba32.Black path
+            f
 
-        let internal fillBackground (ctx:IImageProcessingContext<Rgba32>) =
-            ctx.Fill(Rgba32.White) |> ignore
+        let internal fillBackground ctx = fill Rgba32.White ctx
 
         let internal withPathBuilder f =
             let pb = PathBuilder()
@@ -89,27 +82,67 @@ namespace Plot.Core.LineChart
             let pb = PathBuilder()
             pb |> addLinesF scaledSeries.scaledPoints
             let path = pb.Build()
-            let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(scaledSeries.lineStyle.Color, scaledSeries.lineStyle.Thickness, path) |> ignore
+            let drawFunc ctx = draw scaledSeries.lineStyle.Color scaledSeries.lineStyle.Thickness path ctx
             drawFunc
 
-        let internal drawMajorGridLines settings img =
-            let pbAxes = PathBuilder()
-            let upperLeft, lowerRight = img |> addAxes pbAxes
-            let path = pbAxes.Build()
-            let drawFunc (ctx:IImageProcessingContext<Rgba32>) = ctx.Draw(settings.GridLineStyle.Color, settings.GridLineStyle.Thickness, path) |> ignore
-            upperLeft, lowerRight, drawFunc
+        let internal drawMajorGridLines axisPoints settings =
+            let pb = PathBuilder()
+            pb |> addLineF axisPoints.upperLeft axisPoints.intersect
+            pb |> addLineF axisPoints.intersect axisPoints.lowerRight
+            let path = pb.Build()
+            let drawFunc ctx = draw settings.GridLineStyle.Color settings.GridLineStyle.Thickness path ctx
+            drawFunc
 
-        let internal drawMinorGridLines settings minorGridLines (ctx:IImageProcessingContext<Rgba32>) =
-            
+        let internal drawMinorGridLines settings minorGridLines ctx =
             minorGridLines
             |> List.iter (fun line ->
-                let pb = PathBuilder()
-                pb.AddLine(line.start.ToPointF, line.endd.ToPointF) |> ignore
-                ctx.Draw(settings.MinorGridLineStyle.Color, settings.MinorGridLineStyle.Thickness, pb.Build()) |> ignore)
+                let path = PathBuilder()
+                            .AddLine(line.start.ToPointF, line.endd.ToPointF)
+                            .Build()
+                draw settings.MinorGridLineStyle.Color settings.MinorGridLineStyle.Thickness path ctx)
 
-        let internal drawTitle settings (ctx:IImageProcessingContext<Rgba32>) =
-            let pb = PathBuilder()
+        let internal drawTitle settings ctx =
             let pStart, pEnd = calculateTitleLocation settings
-            pb.AddLine(pStart, pEnd) |> ignore
-            let path = pb.Build()
-            ctx.DrawText(settings.Title, settings.Font, Rgba32.Black, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+            let path = PathBuilder()
+                        .AddLine(pStart, pEnd)
+                        .Build()
+            drawText settings.Title settings.Font Rgba32.Black path ctx
+
+        let drawLegend settings legend ctx =
+            let font = SystemFonts.CreateFont(settings.Font.Name, legend.fontSize, FontStyle.Regular)
+            legend.entries 
+                |> List.iter(fun ent ->
+                    let path2 = PathBuilder()
+                                 .AddLine(ent.lineStartPosition.ToPointF, ent.lineEndPosition.ToPointF)
+                                 .Build()
+                    draw ent.lineStyle.Color ent.lineStyle.Thickness path2 ctx
+                    let path = PathBuilder()
+                                .AddLine(ent.textStartPosition.ToPointF, ent.textEndPosition.ToPointF)
+                                .Build()
+                    drawText ent.title font Rgba32.Black path ctx
+                )
+
+        let internal assembleMinorGridLinesFunctions settings scalingFactors =
+            match settings.HorizontalGridLines with
+            | None -> ignore
+            | Some numLines ->
+                getMinorGridLinePoints scalingFactors numLines
+                |> drawMinorGridLines settings
+
+        let internal drawLineChart axisPoints settings scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize legend =
+            let img = new Image<Rgba32>(settings.Width, settings.Height)
+            img.Mutate(fun ctx ->
+                fillBackground ctx
+                drawMajorGridLines axisPoints settings ctx
+                drawTitle settings ctx
+                drawLegend settings legend ctx
+                assembleMinorGridLinesFunctions settings scalingFactors ctx
+                scaledSeriesList |> List.iter(fun x -> drawDataLines x ctx)
+                drawMaxX maxXPosition minMaxes settings xAxisLabelsFontSize ctx
+                drawMinX minXPosition minMaxes settings xAxisLabelsFontSize ctx
+                drawMinY minYPosition minMaxes settings.Font ctx
+                drawMaxY minMaxes maxYPosition settings.Font ctx
+                )
+            img
+
+

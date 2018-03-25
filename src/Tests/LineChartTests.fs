@@ -6,6 +6,7 @@ open Plot.Core
 open Plot.Core.LineChart.Calculation
 open Plot.Core.LineChart.LineChart
 open Helpers
+open Plot.Core.Settings
 
 [<TestClass>]
 type LineChartTests() =
@@ -32,9 +33,10 @@ type LineChartTests() =
                 }
             }
 
-        let settings = Settings.createLineChartSettings "Air Passenger Data" 1500 500
-        let image = [series; inflatedSeries] |> createLineChart settings
-        image.Save "AirPassengerData.png"
+        let settings = Settings.createLineChartSettings "Air Passenger Data Jan 49 – Dec 60" 1500 500
+        match [series; inflatedSeries] |> createLineChart settings with
+        | Some image -> image.Save "AirPassengerData.png"
+        | None       -> failwith "Something went wrong."
 
     [<TestMethod>]
     member __.``getMinMaxes should get the correct min maxes``() =
@@ -67,15 +69,14 @@ type LineChartTests() =
 
     [<TestMethod>]
     member __.``scalePointsToGrid should fit the points correctly``() =
-        let upperLeft  = { x = 150.;  y = 50.; originalX  = 150.  }
-        let lowerRight = { x = 1350.; y = 450.; originalX = 1350. }
+        let axisPoints = AxisPoints.Create { scaledX = 150.; scaledY = 50.} { scaledX = 1350.; scaledY = 450. }
         let series = { originalPoints = FakeData.hourlyDataDateTimes; title = "whatever"; lineStyle = { Color = Rgba32.White; Thickness = 2.f }}
-        let scaledSeries, _, _ = scalePointsToGrid upperLeft lowerRight series.originalPoints.[0] [series]
+        let scaledSeries, _, _ = scalePointsToGrid axisPoints series.originalPoints.[0] [series]
         
-        let fartherLeftThanUpperLeft   p = p.scaledX < upperLeft.x
-        let fartherUpThanUpperLeft     p = p.scaledY < upperLeft.y
-        let fartherRightThanLowerRight p = p.scaledX > lowerRight.x
-        let fartherDownThanLowerRight  p = p.scaledY > lowerRight.y
+        let fartherLeftThanUpperLeft   p = p.scaledX < axisPoints.upperLeft.scaledX
+        let fartherUpThanUpperLeft     p = p.scaledY < axisPoints.upperLeft.scaledY
+        let fartherRightThanLowerRight p = p.scaledX > axisPoints.lowerRight.scaledX
+        let fartherDownThanLowerRight  p = p.scaledY > axisPoints.lowerRight.scaledY
 
         [
             fartherLeftThanUpperLeft
@@ -88,3 +89,16 @@ type LineChartTests() =
             |> Array.exists f
             |> shouldEqual false
         )
+
+    [<TestMethod>]
+    member __.``Axis points should be calculated correctly``() =
+        let settings = createLineChartSettings "whatever" 1500 500
+        let axisPoints = calculateAxisPoints settings
+        let shouldEqualWithinTolerance = shouldEqualWithin 0.001
+
+        axisPoints.upperLeft.scaledX  |> shouldEqualWithinTolerance 150.
+        axisPoints.upperLeft.scaledY  |> shouldEqualWithinTolerance 50.
+        axisPoints.intersect.scaledX  |> shouldEqualWithinTolerance 150.
+        axisPoints.intersect.scaledY  |> shouldEqualWithinTolerance 450.
+        axisPoints.lowerRight.scaledX |> shouldEqualWithinTolerance 1350.
+        axisPoints.lowerRight.scaledY |> shouldEqualWithinTolerance 450.
