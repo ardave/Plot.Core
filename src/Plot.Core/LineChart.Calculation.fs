@@ -199,13 +199,15 @@ namespace Plot.Core.LineChart
             let lowerRight = { scaledX = w * proportion;        scaledY = h * proportion }
             AxisPoints.Create upperLeft lowerRight
 
-        let getFontSize settings text verticalSpace =
-            [|0..200|]
-            |> Array.map float32
-            |> Array.filter(fun x ->
-                let font = SystemFonts.CreateFont(settings.Font.Name, float32 x, FontStyle.Regular)
-                float (getSize font text).Height < verticalSpace )
-            |> Array.max
+        let getFontSize settings text (verticalSpace:float) =
+            let rec gfs size =
+                let font = SystemFonts.CreateFont(settings.Font.Name, size + 1.f, FontStyle.Regular)
+                let height = (getSize font text).Height
+                if height < float32 verticalSpace then
+                    gfs (size + 1.f)
+                else
+                    size
+            gfs 1.f
 
         let calcMinXPosition minMaxes axisPoints settings fontSize =
             let minXStr = minMaxes.minX.originalValue.ToString()
