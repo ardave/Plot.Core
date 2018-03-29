@@ -37,18 +37,20 @@ namespace Plot.Core.LineChart
             let pointFs = points |> Array.map scaledToOriginal
             addLines pointFs pb
 
-        let internal drawMaxY minMaxes maxYPosition font ctx =
+        let internal drawMaxY minMaxes maxYPosition fontName fontSize ctx =
             let maxYStr = minMaxes.maxY.ToString()
             let path = PathBuilder()
                         .AddLine(maxYPosition |> fst |> scaledToPointF, maxYPosition |> snd |> scaledToPointF)
                         .Build()
+            let font = SystemFonts.CreateFont(fontName, fontSize, FontStyle.Regular)
             drawText maxYStr font Rgba32.Black path ctx
 
-        let internal drawMinY minYPosition minMaxes font =
+        let internal drawMinY minYPosition minMaxes fontName fontSize =
             let minYStr = minMaxes.minY.ToString()
             let path = PathBuilder()
                         .AddLine(minYPosition |> fst |> scaledToPointF, minYPosition |> snd |> scaledToPointF)
                         .Build()
+            let font = SystemFonts.CreateFont(fontName, fontSize, FontStyle.Regular)
             let f = drawText minYStr font Rgba32.Black path
             f
 
@@ -129,7 +131,7 @@ namespace Plot.Core.LineChart
                 getMinorGridLinePoints scalingFactors numLines
                 |> drawMinorGridLines settings
 
-        let internal drawLineChart axisPoints settings scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize legend =
+        let internal drawLineChart axisPoints settings scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize legend  minYLabelFontSize maxYLabelFontSize =
             let img = new Image<Rgba32>(settings.Width, settings.Height)
             img.Mutate(fun ctx ->
                 fillBackground ctx
@@ -140,8 +142,8 @@ namespace Plot.Core.LineChart
                 scaledSeriesList |> List.iter(fun x -> drawDataLines x ctx)
                 drawMaxX maxXPosition minMaxes settings xAxisLabelsFontSize ctx
                 drawMinX minXPosition minMaxes settings xAxisLabelsFontSize ctx
-                drawMinY minYPosition minMaxes settings.Font ctx
-                drawMaxY minMaxes maxYPosition settings.Font ctx
+                drawMinY minYPosition minMaxes settings.Font.Name minYLabelFontSize ctx
+                drawMaxY minMaxes maxYPosition settings.Font.Name maxYLabelFontSize ctx
                 )
             img
 
