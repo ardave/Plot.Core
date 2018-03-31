@@ -110,7 +110,7 @@ type LineChartTests() =
         [10; 25; 50; 100; 200]
         |> List.map float
         |> List.iter(fun verticalSpace ->
-            let fontSize = getFontSize settings "whatever" verticalSpace
+            let fontSize = getFontSize settings "whatever" <| Space.HeightOnly(verticalSpace)
             let font = SystemFonts.CreateFont(settings.Font.Name, fontSize, FontStyle.Regular)
             let size = getSize font "whatever"
             let height = float size.Height

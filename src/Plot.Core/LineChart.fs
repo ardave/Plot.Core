@@ -16,21 +16,21 @@ module LineChart =
             | None            -> None
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
-                let totalVerticalSpace    = float settings.Height - axisPoints.intersect.scaledY
+                let totalVerticalSpace = float settings.Height - axisPoints.intersect.scaledY
 
-                let yAxisLabelsHorizSpace = axisPoints.intersect.scaledX
-                let minYLabelFontSize = getFontSize settings (minMaxes.minY.ToString()) yAxisLabelsHorizSpace
-                let maxYLabelFontSize = getFontSize settings (minMaxes.maxY.ToString()) yAxisLabelsHorizSpace
+                let yAxisLabelsSpace = Space.WidthAndHeight (axisPoints.intersect.scaledX, (axisPoints.intersect.scaledY - axisPoints.upperLeft.scaledY) / 20.)
+                let minYLabelFontSize = getFontSize settings (minMaxes.minY.ToString()) yAxisLabelsSpace
+                let maxYLabelFontSize = getFontSize settings (minMaxes.maxY.ToString()) yAxisLabelsSpace
 
-                printfn "yAxisLabelsHorizSpace %f" yAxisLabelsHorizSpace
+                printfn "yAxisLabelsHorizSpace %A" yAxisLabelsSpace
                 printfn "minYLabelFontSize %f" minYLabelFontSize
                 printfn "maxYLabelFontSize %f" maxYLabelFontSize
                                 
                 let xAxisLabelsVerticalSpace = totalVerticalSpace * 0.6
-                let xAxisLabelsFontSize = (getFontSize settings (minMaxes.minX.originalValue.ToString()) xAxisLabelsVerticalSpace) - 7.5f
+                let xAxisLabelsFontSize = (getFontSize settings (minMaxes.minX.originalValue.ToString()) <| Space.HeightOnly(xAxisLabelsVerticalSpace)) - 7.5f
 
                 let legendVerticalSpace = totalVerticalSpace * 0.4
-                let legendFontSize = getFontSize settings (minMaxes.minX.originalValue.ToString()) legendVerticalSpace
+                let legendFontSize = getFontSize settings (minMaxes.minX.originalValue.ToString()) <| Space.HeightOnly(legendVerticalSpace)
 
                 let legend = calculateLegend legendFontSize xAxisLabelsVerticalSpace legendVerticalSpace axisPoints settings seriesList
                 let minXPosition = calcMinXPosition minMaxes axisPoints settings xAxisLabelsFontSize

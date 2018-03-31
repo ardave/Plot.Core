@@ -33,6 +33,12 @@ namespace Plot.Core.LineChart
                     lowerRight = lr
                     intersect = { scaledX = ul.scaledX; scaledY = lr.scaledY }
                 }
+
+        type Space =
+        | WidthOnly      of float
+        | HeightOnly     of float
+        | WidthAndHeight of float * float
+
         let minMaxesCreate minX maxX minY maxY = 
             {
                 minX = minMaxCreate minX
@@ -199,14 +205,27 @@ namespace Plot.Core.LineChart
             let lowerRight = { scaledX = w * proportion;        scaledY = h * proportion }
             AxisPoints.Create upperLeft lowerRight
 
-        let getFontSize settings text (verticalSpace:float) =
-            let rec gfs size =
-                let font = SystemFonts.CreateFont(settings.Font.Name, size + 1.f, FontStyle.Regular)
-                let height = (getSize font text).Height
-                if height < float32 verticalSpace then
-                    gfs (size + 1.f)
-                else
-                    size
+        let internal getFontSize settings text space =
+            let rec gfs currentSize =
+                let font = SystemFonts.CreateFont(settings.Font.Name, currentSize + 1.f, FontStyle.Regular)
+                let size = getSize font text
+                match space with
+                | WidthOnly w ->
+                    if size.Width < float32 w then
+                        gfs (currentSize + 1.f)
+                    else
+                        currentSize
+                | HeightOnly h ->
+                    if size.Height < float32 h then
+                        gfs (currentSize + 1.f)
+                    else
+                        currentSize
+                | WidthAndHeight (w, h) ->
+                    if size.Width < float32 w && size.Height < float32 h then
+                        gfs (currentSize + 1.f)
+                    else
+                        currentSize
+                        
             gfs 1.f
 
         let calcMinXPosition minMaxes axisPoints settings fontSize =
