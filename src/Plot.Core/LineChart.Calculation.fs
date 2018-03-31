@@ -33,6 +33,12 @@ namespace Plot.Core.LineChart
                     lowerRight = lr
                     intersect = { scaledX = ul.scaledX; scaledY = lr.scaledY }
                 }
+
+        type Space =
+        | WidthOnly      of float
+        | HeightOnly     of float
+        | WidthAndHeight of float * float
+
         let minMaxesCreate minX maxX minY maxY = 
             {
                 minX = minMaxCreate minX
@@ -43,7 +49,7 @@ namespace Plot.Core.LineChart
 
         let private pointToMinMax point = { originalValue = point.originalX; value = point.x }
 
-        let private getSize font text = TextMeasurer.Measure(text, new RendererOptions(font))
+        let internal getSize font text = TextMeasurer.Measure(text, new RendererOptions(font))
 
         let internal getMinMaxes firstPoint seriesList =
             let initialState =
@@ -199,14 +205,28 @@ namespace Plot.Core.LineChart
             let lowerRight = { scaledX = w * proportion;        scaledY = h * proportion }
             AxisPoints.Create upperLeft lowerRight
 
-        let getFontSize settings minMaxes verticalSpace =
-            let minXStr = minMaxes.minX.originalValue.ToString()
-            [|0..30|]
-            |> Array.map float32
-            |> Array.filter(fun x ->
-                let font = SystemFonts.CreateFont(settings.Font.Name, float32 x, FontStyle.Regular)
-                float (getSize font minXStr).Height < verticalSpace )
-            |> Array.max
+        let internal getFontSize settings text space =
+            let rec gfs currentSize =
+                let font = SystemFonts.CreateFont(settings.Font.Name, currentSize + 1.f, FontStyle.Regular)
+                let size = getSize font text
+                match space with
+                | WidthOnly w ->
+                    if size.Width < float32 w then
+                        gfs (currentSize + 1.f)
+                    else
+                        currentSize
+                | HeightOnly h ->
+                    if size.Height < float32 h then
+                        gfs (currentSize + 1.f)
+                    else
+                        currentSize
+                | WidthAndHeight (w, h) ->
+                    if size.Width < float32 w && size.Height < float32 h then
+                        gfs (currentSize + 1.f)
+                    else
+                        currentSize
+                        
+            gfs 1.f
 
         let calcMinXPosition minMaxes axisPoints settings fontSize =
             let minXStr = minMaxes.minX.originalValue.ToString()
