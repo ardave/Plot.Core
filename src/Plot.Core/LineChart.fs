@@ -16,6 +16,7 @@ module LineChart =
             | None            -> None
             | Some firstPoint -> 
                 let scaledSeriesList, minMaxes, scalingFactors = scalePointsToGrid axisPoints firstPoint seriesList
+
                 let totalVerticalSpace = float settings.Height - axisPoints.intersect.scaledY
 
                 let yAxisLabelsSpace = Space.WidthAndHeight (axisPoints.intersect.scaledX, (axisPoints.intersect.scaledY - axisPoints.upperLeft.scaledY) / 20.)
@@ -39,4 +40,5 @@ module LineChart =
                 let maxYPosition = calcMaxYPosition minMaxes axisPoints settings
                 
                 let img = drawLineChart axisPoints settings scaledSeriesList scalingFactors minMaxes minXPosition minYPosition maxXPosition maxYPosition xAxisLabelsFontSize legend minYLabelFontSize maxYLabelFontSize
+
                 Some img

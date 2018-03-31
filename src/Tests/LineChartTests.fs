@@ -110,7 +110,7 @@ type LineChartTests() =
         [10; 25; 50; 100; 200]
         |> List.map float
         |> List.iter(fun verticalSpace ->
-            let fontSize = getFontSize settings "whatever" <| Space.HeightOnly(verticalSpace)
+            let fontSize = getFontSize settings "whatever" <| Space.HeightOnly verticalSpace
             let font = SystemFonts.CreateFont(settings.Font.Name, fontSize, FontStyle.Regular)
             let size = getSize font "whatever"
             let height = float size.Height
@@ -122,3 +122,4 @@ type LineChartTests() =
             if proportionFilled < 0.75 then
                 failwithf "Rendered text should have filled at least 75%% of available vertical space, but %f / %f = %f" height verticalSpace proportionFilled
         )
+
