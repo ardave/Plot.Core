@@ -8,6 +8,7 @@ open Plot.Core.LineChart.Calculation
 open Plot.Core.LineChart.LineChart
 open Helpers
 open Plot.Core.Settings
+open SixLabors.ImageSharp.PixelFormats
 
 [<TestClass>]
 type LineChartTests() =

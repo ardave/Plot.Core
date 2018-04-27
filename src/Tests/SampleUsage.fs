@@ -5,6 +5,7 @@ module SampleUsage
 open Plot.Core
 open Plot.Core.LineChart
 open SixLabors.ImageSharp
+open SixLabors.ImageSharp.PixelFormats
 
 let series = {
         originalPoints = Plot.Core.FakeData.hourlyDataDateTimes

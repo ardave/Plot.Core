@@ -1,9 +1,9 @@
 namespace Plot.Core
 
 module Settings =
-    open SixLabors.ImageSharp
+    open SixLabors.ImageSharp.PixelFormats
     open SixLabors.Fonts
-
+    
     type LineStyle = {
         Color     : Rgba32
         Thickness : float32

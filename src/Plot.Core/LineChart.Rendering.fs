@@ -4,15 +4,19 @@ namespace Plot.Core.LineChart
     module internal Rendering =
         open SixLabors.Fonts
         open SixLabors.ImageSharp
-        open SixLabors.ImageSharp.Drawing
-        open SixLabors.Primitives
+        open SixLabors.ImageSharp.PixelFormats
         open SixLabors.Shapes
+        open SixLabors.ImageSharp.Processing
+        open SixLabors.Primitives
         open Plot.Core
         open Plot.Core.Settings
         open LineChart.Calculation
 
+        open SixLabors.ImageSharp.Processing.Text
+        open SixLabors.ImageSharp.Processing.Drawing
+
         let private drawText (text:string) (font:Font) (color:Rgba32) (path:IPath) (ctx:IImageProcessingContext<Rgba32>) = 
-            ctx.DrawText(text, font, color, path, TextGraphicsOptions(true, WrapTextWidth = path.Length)) |> ignore
+            ctx.DrawText(TextGraphicsOptions(true, WrapTextWidth = path.Length), text, font, color, path) |> ignore
         let private draw (color:Rgba32) thickness (path:IPath) (ctx:IImageProcessingContext<Rgba32>) =
             ctx.Draw(color, thickness, path) |> ignore
 
