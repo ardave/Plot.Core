@@ -5,7 +5,7 @@ module FakeData =
     open System
     open Plot.Core.LineChart
 
-    let hourlyDataInts =
+    let monthlyDataInts =
         [|
         112
         118
@@ -153,7 +153,7 @@ module FakeData =
         432
         |] |> Array.mapi(fun i x -> { x = float i; y = float x; originalX = i})
 
-    let hourlyDataDateTimes =
+    let monthlyDataDateTimes =
         [|
         "1949-01",112
         "1949-02",118
