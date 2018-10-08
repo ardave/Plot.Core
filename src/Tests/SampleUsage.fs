@@ -8,12 +8,12 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 
 let series = {
-        originalPoints = Plot.Core.FakeData.hourlyDataDateTimes
+        originalPoints = Plot.Core.FakeData.monthlyDataDateTimes
         title = "Air Passenger Data"
         lineStyle = { Color = Rgba32.Orange; Thickness = 2.f }
     }
 let inflatedSeries = {
-        originalPoints = Plot.Core.FakeData.hourlyDataDateTimes |> Array.map(fun op -> { op with y = op.y + 100. })
+        originalPoints = Plot.Core.FakeData.monthlyDataDateTimes |> Array.map(fun op -> { op with y = op.y + 100. })
         title = "Inflated Air Passenger Data"
         lineStyle = { Color = Rgba32.LightBlue; Thickness = 2.f }
     }

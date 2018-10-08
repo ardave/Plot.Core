@@ -16,7 +16,7 @@ type LineChartTests() =
     member __.``Generate actual image from air passenger data`` () =
         let series =
             {
-                originalPoints = Plot.Core.FakeData.hourlyDataDateTimes
+                originalPoints = Plot.Core.FakeData.monthlyDataDateTimes
                 title = "Air Passenger Data"
                 lineStyle = 
                     {
@@ -26,7 +26,7 @@ type LineChartTests() =
             }
         let inflatedSeries = 
             {
-                originalPoints = Plot.Core.FakeData.hourlyDataDateTimes |> Array.map(fun op -> { op with y = op.y + 100. })
+                originalPoints = Plot.Core.FakeData.monthlyDataDateTimes |> Array.map(fun op -> { op with y = op.y + 100. })
                 title = "Inflated Air Passenger Data"
                 lineStyle = 
                 {
@@ -72,7 +72,7 @@ type LineChartTests() =
     [<TestMethod>]
     member __.``scalePointsToGrid should fit the points correctly``() =
         let axisPoints = AxisPoints.Create { scaledX = 150.; scaledY = 50.} { scaledX = 1350.; scaledY = 450. }
-        let series = { originalPoints = FakeData.hourlyDataDateTimes; title = "whatever"; lineStyle = { Color = Rgba32.White; Thickness = 2.f }}
+        let series = { originalPoints = FakeData.monthlyDataDateTimes; title = "whatever"; lineStyle = { Color = Rgba32.White; Thickness = 2.f }}
         let scaledSeries, _, _ = scalePointsToGrid axisPoints series.originalPoints.[0] [series]
         
         let fartherLeftThanUpperLeft   p = p.scaledX < axisPoints.upperLeft.scaledX
