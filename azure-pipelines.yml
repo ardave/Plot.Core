@@ -12,5 +12,5 @@ variables:
 steps:
 - script: |
     dotnet build src/Tests/Tests.fsproj --configuration $(buildConfiguration)
-    dotnet test src\Tests\Tests.fsproj
+    dotnet test src/Tests/Tests.fsproj
   displayName: 'dotnet build $(buildConfiguration)'
