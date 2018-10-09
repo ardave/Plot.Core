@@ -1,4 +1,6 @@
 # Plot.Core
+![Build Status](https://dev.azure.com/ardavex/Plot.Core/_apis/build/status/ardave.Plot.Core "Build Status")
+
 Cross-Platform Chart Generation Library for .NET Core.
 
 I couldn't find a chart rendering library to run under .NET Core (specifically for, but not limited to, AWS Lambda), so I created this one.
